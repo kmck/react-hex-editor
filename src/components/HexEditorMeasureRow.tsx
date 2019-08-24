@@ -5,6 +5,11 @@ import {
   HexEditorInlineStyles,
 } from '../types';
 
+import {
+  EMPTY_CLASSNAMES,
+  EMPTY_INLINE_STYLES,
+} from '../constants';
+
 import HexOffsetLabel from './HexOffsetLabel';
 import HexEditorGutter from './HexEditorGutter';
 import HexByteValue from './HexByteValue';
@@ -40,11 +45,11 @@ const HexEditorMeasureRow = ({
   asciiWidth: explicitAsciiWidth,
   byteWidth: explicitByteWidth,
   className,
-  classNames = {},
+  classNames = EMPTY_CLASSNAMES,
   formatOffset,
   formatValue,
   gutterWidth: explicitGutterWidth,
-  styles = {},
+  styles = EMPTY_INLINE_STYLES,
   labelWidth: explicitLabelWidth,
   offset,
   onMeasure,
@@ -128,5 +133,7 @@ const HexEditorMeasureRow = ({
     </div>
   );
 };
+
+HexEditorMeasureRow.displayName = 'HexEditorMeasureRow';
 
 export default HexEditorMeasureRow;

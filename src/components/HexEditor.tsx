@@ -12,6 +12,7 @@ import React, {
 import joinClassNames from 'classnames';
 import {
   Align,
+  ListOnItemsRenderedProps,
   FixedSizeList as List,
 } from 'react-window';
 import Keycoder from 'keycoder';
@@ -19,6 +20,7 @@ import Keycoder from 'keycoder';
 import {
   KEY_A,
   KEY_BACK_SPACE,
+  KEY_DELETE,
   KEY_DOWN,
   KEY_END,
   KEY_HOME,
@@ -56,10 +58,10 @@ import CLASS_NAMES from '../constants/classNames';
 import INLINE_STYLES, { INPUT_STYLE } from '../constants/inlineStyles';
 
 import HexEditorRow from './HexEditorRow';
-import HexEditorContext, { IHexEditorContextInterface } from '../contexts/HexEditorContext';
+import HexEditorContext, { HexEditorContextInterface } from '../contexts/HexEditorContext';
 import HexEditorBody from './HexEditorBody';
 
-interface IState {
+interface State {
   cursorOffset: number,
   editMode: EditModeType,
   isFocused: boolean,
@@ -70,9 +72,11 @@ interface IState {
   selectionEnd: number,
   selectionStart: number,
   viewportRowOffset: number,
+  visibleStartIndex: number,
+  visibleStopIndex: number,
 };
 
-interface IAction {
+interface Action {
   cursorOffset?: number,
   editMode?: EditModeType,
   isFocused?: boolean,
@@ -83,9 +87,11 @@ interface IAction {
   selectionEnd?: number,
   selectionStart?: number,
   viewportRowOffset?: number,
+  visibleStartIndex?: number,
+  visibleStopIndex?: number,
 };
 
-export interface IHexEditorProps {
+export interface HexEditorProps {
   className?: string,
   classNames?: HexEditorClassNames,
   columns: number,
@@ -93,11 +99,13 @@ export interface IHexEditorProps {
   formatValue?: (value: number) => string,
   inlineStyles?: HexEditorInlineStyles,
   height: number,
+  highlightColumn?: boolean,
   inputStyle?: React.CSSProperties | null,
   nonce?: number | string,
   onBlur?: (e: React.FocusEvent) => void,
   onFocus?: (e: React.FocusEvent) => void,
   onSetValue?: (offset: number, value: number) => void,
+  overscanCount?: number,
   readOnly?: boolean,
   rowHeight: number,
   rows: number,
@@ -109,21 +117,23 @@ export interface IHexEditorProps {
   width: number,
 };
 
-const reducer = (prevState: IState, mergeState: IAction) => ({ ...prevState, ...mergeState });
+const reducer = (prevState: State, mergeState: Action) => ({ ...prevState, ...mergeState });
 
-const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> = ({
+const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
   className,
   classNames = CLASS_NAMES,
   columns,
   data = [],
   formatValue = byteToAscii,
   height,
+  highlightColumn = false,
   inlineStyles = INLINE_STYLES,
   inputStyle = INPUT_STYLE,
   nonce,
   onBlur,
   onFocus,
   onSetValue,
+  overscanCount,
   readOnly = false,
   rowHeight,
   rows,
@@ -145,6 +155,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     selectionEnd: 0,
     selectionStart: 0,
     viewportRowOffset: 0,
+    visibleStartIndex: 0,
+    visibleStopIndex: 0,
   });
 
   const columnData = useMemo(
@@ -159,6 +171,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     columns,
     data,
     readOnly,
+    rows,
     showAscii,
     ...state,
   });
@@ -168,10 +181,11 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
       columns,
       data,
       readOnly,
+      rows,
       showAscii,
       ...state,
     };
-  }, [columns, data, data.length, readOnly, showAscii, state]);
+  }, [columns, data, data.length, readOnly, rows, showAscii, state]);
 
   const blur = useCallback(() => {
     if (inputRef.current) {
@@ -286,12 +300,18 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     editMode?: EditModeType,
     _e?: React.MouseEvent,
   ) => {
-    if (editMode != null) {
-      setState({ editMode });
-    }
+    const {
+      selectionAnchor,
+    } = stateRef.current;
 
-    setState({ selectionAnchor: offset });
-    setSelectionRange(offset, offset, null, false);
+    if (selectionAnchor == null) {
+      if (editMode != null) {
+        setState({ editMode });
+      }
+
+      setState({ selectionAnchor: offset });
+      setSelectionRange(offset, offset, null, false);
+    }
   }, [setSelectionRange]);
 
   const setSelectionEnd = useCallback((
@@ -305,11 +325,11 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
       selectionStart,
     } = stateRef.current;
 
-    if (editMode != null) {
-      setState({ editMode });
-    }
-
     if (selectionAnchor != null) {
+      if (editMode != null) {
+        setState({ editMode });
+      }
+
       const start = Math.min(selectionAnchor, offset);
       const end = Math.max(selectionAnchor, offset);
       const selectionDirection = offset > selectionAnchor
@@ -334,7 +354,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     }
   }, []);
 
-  const scrollToItem = useCallback((rowIndex: number, align: Align) => {
+  const scrollToItem = useCallback((rowIndex: number, align?: Align) => {
     if (rowListRef.current) {
       rowListRef.current.scrollToItem(rowIndex, align);
     }
@@ -385,93 +405,61 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     } = stateRef.current;
     const dataLength = data.length;
 
-    if (ctrlKey || metaKey) {
-      switch (which) {
-        case KEY_A:
-          setSelectionRange(0, dataLength);
-          break;
-
-        case KEY_HOME: {
-          if (shiftKey) {
-            const end = selectionDirection === SELECTION_DIRECTION_BACKWARD
-              ? selectionEnd
-              : selectionStart;
-            setSelectionRange(0, end, SELECTION_DIRECTION_BACKWARD);
-          } else {
-            setSelectionRange(0);
-          }
-          break;
-        }
-        case KEY_END: {
-          if (shiftKey) {
-            const start = selectionDirection === SELECTION_DIRECTION_BACKWARD
-              ? selectionEnd
-              : selectionStart;
-            setSelectionRange(start, dataLength, SELECTION_DIRECTION_FORWARD);
-          } else {
-            setSelectionRange(dataLength - 1);
-          }
-          break;
-        }
-
-        default:
-          break;
-      }
-      return;
-    }
-
-    if (which === KEY_TAB) {
-      if (!shiftKey && showAscii && editMode === EDIT_MODE_HEX) {
-        setState({ editMode: EDIT_MODE_ASCII });
-        e.preventDefault();
-      } else if (shiftKey && editMode === EDIT_MODE_ASCII) {
-        setState({ editMode: EDIT_MODE_HEX });
-        e.preventDefault();
-      }
-      return;
-    }
-
-    e.preventDefault();
-
     const isSelection = selectionStart !== selectionEnd;
 
     switch (true) {
-      case which === KEY_UP:
-      case which === KEY_LEFT: {
-        const offset = which === KEY_UP ? columns : 1;
-        if (shiftKey) {
-          if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
-            setSelectionRange(selectionEnd, selectionStart - offset);
-          } else {
-            setSelectionRange(selectionStart, selectionEnd - offset);
-          }
-        } else {
-          const cursorPosition = isSelection
-            ? selectionStart
-            : Math.max(0, selectionStart - offset);
-          setSelectionRange(cursorPosition);
-        }
-        break;
+      // Select all
+      case ctrlKey && which === KEY_A:
+      case metaKey && which === KEY_A: {
+        setSelectionRange(0, dataLength);
+        e.preventDefault();
+        return;
       }
 
-      case which === KEY_DOWN:
-      case which === KEY_RIGHT: {
-        const offset = which === KEY_DOWN ? columns : 1;
+      // Go to first character
+      case metaKey && which === KEY_UP:
+      case ctrlKey && which === KEY_HOME: {
         if (shiftKey) {
-          if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
-            setSelectionRange(selectionEnd, selectionStart + offset);
-          } else {
-            setSelectionRange(selectionStart, selectionEnd + offset);
-          }
-        } else {
-          const cursorPosition = isSelection
+          const end = selectionDirection === SELECTION_DIRECTION_BACKWARD
             ? selectionEnd
-            : Math.min(selectionEnd + offset, data.length - 1);
-          setSelectionRange(cursorPosition);
+            : selectionStart;
+          setSelectionRange(0, end, SELECTION_DIRECTION_BACKWARD);
+        } else {
+          setSelectionRange(0);
         }
-        break;
+        e.preventDefault();
+        return;
       }
 
+      // Go to last character
+      case metaKey && which === KEY_DOWN:
+      case ctrlKey && which === KEY_END: {
+        if (shiftKey) {
+          const start = selectionDirection === SELECTION_DIRECTION_BACKWARD
+            ? selectionEnd
+            : selectionStart;
+          setSelectionRange(start, dataLength, SELECTION_DIRECTION_FORWARD);
+        } else {
+          setSelectionRange(dataLength - 1);
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Toggle between hex and ascii panes
+      case (which === KEY_TAB): {
+        if (!shiftKey && showAscii && editMode === EDIT_MODE_HEX) {
+          setState({ editMode: EDIT_MODE_ASCII });
+          e.preventDefault();
+        } else if (shiftKey && editMode === EDIT_MODE_ASCII) {
+          setState({ editMode: EDIT_MODE_HEX });
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Go to start of line
+      case metaKey && which === KEY_LEFT:
       case which === KEY_HOME: {
         const selectionAnchor = selectionDirection === SELECTION_DIRECTION_BACKWARD
           ? selectionStart
@@ -487,9 +475,12 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
           const cursorPosition = columns * Math.floor(selectionAnchor / columns);
           setSelectionRange(cursorPosition);
         }
-        break;
+        e.preventDefault();
+        return;
       }
 
+      // Go to end of line
+      case metaKey && which === KEY_RIGHT:
       case which === KEY_END: {
         const selectionAnchor = selectionDirection === SELECTION_DIRECTION_BACKWARD
           ? selectionStart
@@ -505,23 +496,95 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
           const cursorPosition = columns * (Math.floor(selectionAnchor / columns) + 1) - 1;
           setSelectionRange(Math.min(cursorPosition, dataLength - 1));
         }
-        break;
+        e.preventDefault();
+        return;
       }
 
-      case which === KEY_BACK_SPACE:
+      // Ignore modified keys
+      case ctrlKey || metaKey:
+        return;
+
+      // Go back one row or column
+      case which === KEY_UP:
+      case which === KEY_LEFT: {
+        const offset = which === KEY_UP ? columns : 1;
+        if (shiftKey) {
+          if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
+            setSelectionRange(selectionEnd, selectionStart - offset);
+          } else {
+            setSelectionRange(selectionStart, selectionEnd - offset);
+          }
+        } else {
+          const cursorPosition = isSelection
+            ? selectionStart
+            : selectionStart - offset;
+          setSelectionRange(Math.max(0, cursorPosition));
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Go forward one row or column
+      case which === KEY_DOWN:
+      case which === KEY_RIGHT: {
+        const offset = which === KEY_DOWN ? columns : 1;
+        if (shiftKey) {
+          if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
+            setSelectionRange(selectionEnd, selectionStart + offset);
+          } else {
+            setSelectionRange(selectionStart, selectionEnd + offset);
+          }
+        } else {
+          const cursorPosition = isSelection
+            ? selectionEnd - 1
+            : selectionEnd + offset;
+          setSelectionRange(Math.min(cursorPosition, data.length - 1));
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Clear previous character
+      case which === KEY_BACK_SPACE: {
         if (!readOnly) {
           if (nybbleOffset && nybbleHigh != null) {
             setState({
               nybbleHigh: null,
               nybbleOffset: 0,
             });
+          } else if (shiftKey) {
+            setValue(selectionEnd, 0x00);
+            setSelectionRange(selectionEnd);
           } else {
             setValue(selectionEnd - 1, 0x00);
             setSelectionRange(selectionEnd - 1);
           }
         }
-        break;
+        e.preventDefault();
+        return;
+      }
 
+      // Clear next character
+      case which === KEY_DELETE: {
+        if (!readOnly) {
+          if (nybbleOffset && nybbleHigh != null) {
+            setState({
+              nybbleHigh: null,
+              nybbleOffset: 0,
+            });
+          } else if (shiftKey) {
+            setValue(selectionEnd, 0x00);
+            setSelectionRange(selectionEnd);
+          } else {
+            setValue(selectionEnd, 0x00);
+            setSelectionRange(selectionEnd + 1);
+          }
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Edit hex value
       case editMode === EDIT_MODE_HEX && which in KEY_VALUES: {
         if (!readOnly) {
           const nybbleValue = KEY_VALUES[which];
@@ -543,9 +606,11 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
             });
           }
         }
-        break;
+        e.preventDefault();
+        return;
       }
 
+      // Edit ascii value
       case editMode === EDIT_MODE_ASCII: {
         if (!readOnly) {
           const key = Keycoder.fromEvent(e);
@@ -557,11 +622,13 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
             }
           }
         }
-        break;
+        e.preventDefault();
+        return;
       }
 
+      // Ignore
       default:
-        break;
+        return;
     }
   }, [setValue, setSelectionRange]);
 
@@ -586,10 +653,25 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     setSelectionRange(Math.min(cursorOffset + values.length, dataLength - 1));
   }, [setValue, setSelectionRange]);
 
+  const handleItemsRendered = useCallback(({
+    visibleStartIndex,
+    visibleStopIndex,
+  }: ListOnItemsRenderedProps) => {
+    setState({ visibleStartIndex, visibleStopIndex });
+  }, []);
+
   useLayoutEffect(() => {
     if (rowListRef.current) {
+      const {
+        visibleStartIndex,
+        visibleStopIndex,
+      } = stateRef.current;
       const rowIndex = Math.floor(state.cursorOffset / columns);
-      rowListRef.current.scrollToItem(rowIndex);
+      if (rowIndex <= visibleStartIndex) {
+        rowListRef.current.scrollToItem(rowIndex, 'center');
+      } else if (rowIndex >= visibleStopIndex) {
+        rowListRef.current.scrollToItem(rowIndex, 'center');
+      }
     }
   }, [columns, state.cursorOffset]);
 
@@ -599,7 +681,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
   );
 
   const formatOffset = useMemo(() => {
-    const padToLength = 2 * Math.ceil(formatHex(data.length).length / 2);
+    const padToLength = 2 * Math.ceil(formatHex(Math.max(0, data.length - 1)).length / 2);
     return (offset: number) => formatHex(offset, padToLength);
   }, [data.length]);
 
@@ -611,10 +693,28 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
   const {
     cursorColumn,
     cursorRow,
-  } = useMemo(() => ({
-    cursorColumn: state.cursorOffset % columns,
-    cursorRow: Math.floor(state.cursorOffset / columns),
-  }), [columns, state.cursorOffset]);
+  } = useMemo(() => {
+    const isForwardSelection = (
+      state.selectionStart !== state.selectionEnd
+      && state.selectionDirection !== SELECTION_DIRECTION_BACKWARD
+    );
+    const nextCursorColumn = isForwardSelection
+      ? (state.cursorOffset - 1) % columns
+      : state.cursorOffset % columns;
+    const nextCursorRow = isForwardSelection
+      ? Math.floor((state.cursorOffset - 1) / columns)
+      : Math.floor(state.cursorOffset / columns);
+    return {
+      cursorColumn: nextCursorColumn,
+      cursorRow: nextCursorRow,
+    };
+  }, [
+    columns,
+    state.cursorOffset,
+    state.selectionStart,
+    state.selectionEnd,
+    state.selectionDirection,
+  ]);
 
   const editorStyle = useMemo(() => (
     style && inlineStyles.editor
@@ -633,16 +733,17 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     overflowY: 'scroll',
   }), [inlineStyles.body]);
 
-  const hexEditorContext: IHexEditorContextInterface = useMemo(() => ({
+  const hexEditorContext: HexEditorContextInterface = useMemo(() => ({
     classNames,
     columns,
-    cursorColumn,
+    cursorColumn: highlightColumn ? cursorColumn : undefined,
     cursorOffset: state.cursorOffset,
     cursorRow,
     data,
     formatOffset,
     formatValue,
     isEditing: !!state.nybbleOffset,
+    nonce,
     nybbleHigh: state.nybbleHigh,
     rows,
     selectionAnchor: state.selectionAnchor,
@@ -663,7 +764,9 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
     data,
     formatOffset,
     formatValue,
+    highlightColumn,
     inlineStyles,
+    nonce,
     rows,
     setSelectionEnd,
     setSelectionRange,
@@ -726,6 +829,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
         <HexEditorBody
           className={classNames.body}
           height={showColumnLabels ? height - rowHeight : height}
+          onItemsRendered={handleItemsRendered}
+          overscanCount={overscanCount || rows}
           rowCount={rowCount}
           rowHeight={rowHeight}
           rows={rows}
@@ -738,6 +843,6 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
   );
 };
 
-const ImperativeHexEditor = forwardRef(HexEditor);
+HexEditor.displayName = 'HexEditor';
 
-export default memo(ImperativeHexEditor);
+export default memo(forwardRef(HexEditor));

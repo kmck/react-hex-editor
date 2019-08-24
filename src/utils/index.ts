@@ -31,3 +31,25 @@ export function formatHexByte(value: number) {
 export function byteToAscii(value: number) {
   return ASCII_LOOKUP[value & 0xff];
 }
+
+export function hasSelection(
+  start: number,
+  end: number,
+  selectionStart: number,
+  selectionEnd: number = selectionStart,
+) {
+  // Selection contains range
+  if (selectionStart <= start && selectionEnd >= end) {
+    return true;
+  }
+  // Selection starts in range
+  if (selectionStart >= start && selectionStart <= end) {
+    return true;
+  }
+  // Selection ends in range
+  if (selectionEnd >= start && selectionEnd <= end) {
+    return true;
+  }
+  // Selection does not overlap range
+  return false;
+}

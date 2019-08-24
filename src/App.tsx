@@ -13,7 +13,7 @@ import {
   StyledHexEditor,
 } from './ReactHexEditor';
 
-const INITIAL_DATA = new Array(0x200).fill(0)
+const INITIAL_DATA = new Array(0x10000).fill(0)
   .map((_v, i) => (i & 0xff));
 
 const App: React.FC<{ className?: string }> = ({ className = '' }) => {
@@ -31,6 +31,11 @@ const App: React.FC<{ className?: string }> = ({ className = '' }) => {
       (window as any).hexEditor = hexEditorRef.current;
     }
   });
+
+  const theme = React.useMemo(() => ({
+    hexEditor: oneDarkProTheme,
+    // hexEditor: defaultTheme,
+  }), []);
 
   return (
     <div className={className}>
@@ -52,8 +57,7 @@ const App: React.FC<{ className?: string }> = ({ className = '' }) => {
           showAscii
           showColumnLabels
           showRowLabels
-          // theme={{ hexEditor: defaultTheme }}
-          theme={{ hexEditor: oneDarkProTheme }}
+          theme={theme}
           // width={600}
         />
       </div>

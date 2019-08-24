@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, memo } from 'react';
 
 interface Props {
   children?: React.ReactNode,
@@ -6,20 +6,20 @@ interface Props {
   style?: React.CSSProperties,
 };
 
-const HexEditorGutter = forwardRef(({
+const HexEditorGutter = ({
   children = <>&nbsp;</>,
   className,
   style,
-}: Props, ref: React.Ref<HTMLDivElement>) => {
-  return (
-    <div
-      className={className}
-      ref={ref}
-      style={style}
-    >
-      {children}
-    </div>
-  );
-});
+}: Props, ref: React.Ref<HTMLDivElement>) => (
+  <div
+    className={className}
+    ref={ref}
+    style={style}
+  >
+    {children}
+  </div>
+);
 
-export default React.memo(HexEditorGutter);
+HexEditorGutter.displayName = 'HexEditorGutter';
+
+export default memo(forwardRef(HexEditorGutter));

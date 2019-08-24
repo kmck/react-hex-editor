@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  memo,
   useMemo,
 } from 'react';
 
@@ -10,7 +11,7 @@ interface Props {
   style?: React.CSSProperties,
 };
 
-const HexOffsetLabel = forwardRef(({
+const HexOffsetLabel = ({
   className,
   formatOffset,
   offset,
@@ -30,6 +31,8 @@ const HexOffsetLabel = forwardRef(({
       {formattedOffset}
     </div>
   );
-});
+};
 
-export default React.memo(HexOffsetLabel);
+HexOffsetLabel.displayName = 'HexOffsetLabel';
+
+export default memo(forwardRef(HexOffsetLabel));

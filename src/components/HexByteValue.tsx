@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useState,
@@ -11,7 +12,10 @@ import {
   SelectionDirectionType,
   SetSelectionBoundaryCallback,
 } from '../types';
-import { EDIT_MODE_HEX } from '../constants';
+import {
+  EDIT_MODE_HEX,
+  EMPTY_CLASSNAMES,
+} from '../constants';
 
 interface Props {
   className?: string,
@@ -39,9 +43,9 @@ interface Props {
   value?: number | null,
 };
 
-const HexByte = forwardRef(({
+const HexByte = ({
   className,
-  classNames = {},
+  classNames = EMPTY_CLASSNAMES,
   columnIndex,
   isCursor,
   isCurrentColumn,
@@ -143,6 +147,8 @@ const HexByte = forwardRef(({
       </span>
     </div>
   );
-});
+};
 
-export default React.memo(HexByte);
+HexByte.displayName = 'HexByte';
+
+export default memo(forwardRef(HexByte));

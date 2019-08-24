@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useState,
@@ -11,7 +12,10 @@ import {
   SetSelectionBoundaryCallback,
   SetSelectionRangeCallback,
 } from '../types';
-import { EDIT_MODE_ASCII } from '../constants';
+import {
+  EDIT_MODE_ASCII,
+  EMPTY_CLASSNAMES,
+} from '../constants';
 import { byteToAscii } from '../utils';
 
 
@@ -35,9 +39,9 @@ interface Props {
   value?: number | null,
 };
 
-const HexByteAscii = forwardRef(({
+const HexByteAscii = ({
   className,
-  classNames = {},
+  classNames = EMPTY_CLASSNAMES,
   formatValue = byteToAscii,
   isCursor,
   isSelected,
@@ -128,6 +132,8 @@ const HexByteAscii = forwardRef(({
       &nbsp;
     </div>
   );
-});
+};
 
-export default React.memo(HexByteAscii);
+HexByteAscii.displayName = 'HexByteAscii';
+
+export default memo(forwardRef(HexByteAscii));

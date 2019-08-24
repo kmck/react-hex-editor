@@ -5,10 +5,11 @@ import {
   HexEditorTheme,
   HexEditorHandle,
 } from '../types';
+import { EMPTY_INLINE_STYLES } from '../constants';
 
 import defaultTheme from '../themes/default';
 import {
-  IHexEditorProps,
+  HexEditorProps,
   default as BaseHexEditor,
 } from './HexEditor';
 
@@ -18,10 +19,10 @@ export const hexEditorTheme = <K extends keyof HexEditorTheme>(key: K) =>
     return typeof value === 'number' ? `${value}px` : value;
   };
 
-const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> = ({
-  inlineStyles = {},
+const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
+  inlineStyles = EMPTY_INLINE_STYLES,
   ...restProps
-}: IHexEditorProps, ref) => (
+}: HexEditorProps, ref) => (
   <BaseHexEditor
     inlineStyles={inlineStyles}
     ref={ref}
@@ -29,9 +30,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> 
   />
 );
 
-const ImperativeHexEditor = forwardRef(HexEditor);
-
-export default styled(ImperativeHexEditor)`
+const StyledHexEditor = styled(forwardRef(HexEditor))`
   font-family: ${hexEditorTheme('fontFamily')};
   font-size: ${hexEditorTheme('fontSize')};
 
@@ -302,3 +301,5 @@ export default styled(ImperativeHexEditor)`
     }
   }
 `;
+
+export default StyledHexEditor;

@@ -5,7 +5,7 @@ import HexEditorContext from '../contexts/HexEditorContext';
 
 import HexEditorRow from './HexEditorRow';
 
-const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildComponentProps) => {
+const HexEditorBodyRow = ({ index: rowIndex, isScrolling, style: itemStyle }: ListChildComponentProps) => {
   const {
     classNames,
     columns,
@@ -16,8 +16,8 @@ const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildCompon
     formatOffset,
     formatValue,
     isEditing,
+    nonce,
     nybbleHigh,
-    selectionAnchor,
     selectionDirection,
     selectionEnd,
     selectionStart,
@@ -41,15 +41,16 @@ const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildCompon
       formatOffset={formatOffset}
       formatValue={formatValue}
       isEditing={isEditing}
+      nonce={nonce}
       nybbleHigh={nybbleHigh}
       offset={rowIndex * columns}
       rowIndex={rowIndex}
       selectionDirection={selectionDirection}
       selectionEnd={selectionEnd}
       selectionStart={selectionStart}
-      setSelectionEnd={selectionAnchor ? setSelectionEnd : undefined}
+      setSelectionEnd={setSelectionEnd}
       setSelectionRange={setSelectionRange}
-      setSelectionStart={selectionAnchor ? undefined : setSelectionStart}
+      setSelectionStart={setSelectionStart}
       showAscii={showAscii}
       showLabel={showRowLabels}
       style={styles.row ? { ...itemStyle, ...styles.row } : itemStyle}
@@ -57,5 +58,7 @@ const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildCompon
     />
   );
 };
+
+HexEditorBodyRow.displayName = 'HexEditorBodyRow';
 
 export default HexEditorBodyRow;

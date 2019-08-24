@@ -26,7 +26,7 @@ import {
 import HexEditor from './HexEditor';
 import HexEditorMeasureRow from './HexEditorMeasureRow';
 
-interface IState {
+interface State {
   asciiWidth: number,
   byteWidth: number,
   columns: number,
@@ -36,7 +36,7 @@ interface IState {
   rows: number,
 };
 
-interface IAction {
+interface Action {
   asciiWidth?: number,
   byteWidth?: number,
   columns?: number,
@@ -46,7 +46,7 @@ interface IAction {
   rows?: number,
 };
 
-export interface IAutoSizeHexEditorProps {
+export interface AutoSizeHexEditorProps {
   asciiWidth?: number,
   byteWidth?: number,
   className?: string,
@@ -77,9 +77,9 @@ export interface IAutoSizeHexEditorProps {
   width?: number,
 };
 
-const reducer = (prevState: IState, mergeState: IAction) => ({ ...prevState, ...mergeState });
+const reducer = (prevState: State, mergeState: Action) => ({ ...prevState, ...mergeState });
 
-const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, IAutoSizeHexEditorProps> = ({
+const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeHexEditorProps> = ({
   asciiWidth: explicitAsciiWidth,
   byteWidth: explicitByteWidth,
   classNames = CLASS_NAMES,
@@ -125,7 +125,7 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, IAutoSize
   }, [explicitAsciiWidth, explicitByteWidth, explicitGutterWidth, explicitLabelWidth, explicitRowHeight]);
 
   const formatOffset = useMemo(() => {
-    const padToLength = 2 * Math.ceil(formatHex(props.data.length).length / 2);
+    const padToLength = 2 * Math.ceil(formatHex(Math.max(0, props.data.length - 1)).length / 2);
     return (offset: number) => formatHex(offset, padToLength);
   }, [props.data.length]);
 
@@ -237,6 +237,6 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, IAutoSize
   );
 };
 
-const ImperativeAutoSizeHexEditor = forwardRef(AutoSizeHexEditor);
+AutoSizeHexEditor.displayName = 'AutoSizeHexEditor';
 
-export default memo(ImperativeAutoSizeHexEditor);
+export default memo(forwardRef(AutoSizeHexEditor));

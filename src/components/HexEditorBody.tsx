@@ -4,15 +4,20 @@ import React, {
 } from 'react';
 import {
   ListChildComponentProps,
+  ListOnItemsRenderedProps,
+  ListOnScrollProps,
   FixedSizeList as List,
 } from 'react-window';
 
 import HexEditorBodyRow from './HexEditorBodyRow';
 
-export interface IHexEditorProps {
+export interface HexEditorProps {
   className?: string,
   height: number,
   itemRenderer?: React.ComponentType<ListChildComponentProps>,
+  onItemsRendered?: (props: ListOnItemsRenderedProps) => any,
+  onScroll?: (props: ListOnScrollProps) => any,
+  overscanCount: number,
   rowCount: number,
   rowHeight: number,
   rows: number,
@@ -20,10 +25,13 @@ export interface IHexEditorProps {
   width: number,
 };
 
-const HextEditorBody: React.RefForwardingComponent<List, IHexEditorProps> = ({
+const HexEditorBody: React.RefForwardingComponent<List, HexEditorProps> = ({
   className = undefined,
   height,
   itemRenderer = HexEditorBodyRow,
+  onItemsRendered,
+  onScroll,
+  overscanCount,
   rowCount,
   rowHeight,
   rows,
@@ -37,7 +45,9 @@ const HextEditorBody: React.RefForwardingComponent<List, IHexEditorProps> = ({
       itemCount={rowCount}
       itemSize={rowHeight}
       layout="vertical"
-      overscanCount={rows}
+      onItemsRendered={onItemsRendered}
+      onScroll={onScroll}
+      overscanCount={overscanCount}
       ref={ref}
       style={{ ...style, overflowY: 'scroll' }}
       width={width}
@@ -47,6 +57,6 @@ const HextEditorBody: React.RefForwardingComponent<List, IHexEditorProps> = ({
   );
 };
 
-const ImperativeHexEditorBody = forwardRef(HextEditorBody);
+HexEditorBody.displayName = 'HexEditorBody';
 
-export default memo(ImperativeHexEditorBody);
+export default memo(forwardRef(HexEditorBody));

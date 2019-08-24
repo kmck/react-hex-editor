@@ -2,25 +2,25 @@ import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
 import { HexEditorHandle } from './types';
-
+import { EMPTY_INLINE_STYLES } from './constants';
 import hexEditorStyles from './utils/styles';
 
-import HexEditor, { IHexEditorProps } from './components/HexEditor';
-import AutoSizeHexEditor, { IAutoSizeHexEditorProps } from './components/AutoSizeHexEditor';
+import HexEditor, { HexEditorProps } from './components/HexEditor';
+import AutoSizeHexEditor, { AutoSizeHexEditorProps } from './components/AutoSizeHexEditor';
 
-const NoInlineStylesHexEditor: React.RefForwardingComponent<HexEditorHandle, IHexEditorProps> = ({
-  inlineStyles = {},
+const NoInlineStylesHexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
+  inlineStyles = EMPTY_INLINE_STYLES,
   ...restProps
-}: IHexEditorProps, ref) => (
+}: HexEditorProps, ref) => (
   <HexEditor inlineStyles={inlineStyles} ref={ref} {...restProps} />
 );
 const ImperativeHexEditor = forwardRef(NoInlineStylesHexEditor);
 const StyledHexEditor = styled(ImperativeHexEditor)`${hexEditorStyles}`;
 
-const NoInlineStylesAutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, IAutoSizeHexEditorProps> = ({
-  inlineStyles = {},
+const NoInlineStylesAutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeHexEditorProps> = ({
+  inlineStyles = EMPTY_INLINE_STYLES,
   ...restProps
-}: IAutoSizeHexEditorProps, ref) => (
+}: AutoSizeHexEditorProps, ref) => (
   <AutoSizeHexEditor inlineStyles={inlineStyles} ref={ref} {...restProps} />
 );
 const ImperativeAutoSizeHexEditor = forwardRef(NoInlineStylesAutoSizeHexEditor);

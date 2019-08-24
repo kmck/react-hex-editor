@@ -4,6 +4,7 @@ import React, {
   useMemo,
 } from 'react';
 import joinClassNames from 'classnames';
+import { areEqual } from 'react-window';
 
 import {
   SelectionDirectionType,
@@ -13,15 +14,19 @@ import {
 } from '../types';
 
 import {
+  EMPTY_CLASSNAMES,
+  EMPTY_INLINE_STYLES,
   SELECTION_DIRECTION_BACKWARD,
 } from '../constants';
+
+import { hasSelection } from '../utils';
 
 import HexOffsetLabel from './HexOffsetLabel';
 import HexEditorGutter from './HexEditorGutter';
 import HexByteValue from './HexByteValue';
 import HexAsciiValue from './HexAsciiValue';
 
-export interface IHexEditorRowProps {
+export interface HexEditorRowProps {
   className?: string,
   classNames?: HexEditorClassNames,
   columns?: number,
@@ -56,9 +61,87 @@ export interface IHexEditorRowProps {
   styles?: HexEditorInlineStyles,
 };
 
-const HexEditorRow = forwardRef(({
+function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEditorRowProps) {
+  const {
+    columns: prevColumns = prevProps.data ? prevProps.data.length : 0,
+    cursorOffset: prevCursorOffset,
+    cursorRow: prevCursorRow,
+    offset: prevOffset = 0,
+    rowIndex: prevRowIndex,
+    selectionEnd: prevSelectionEnd,
+    selectionStart: prevSelectionStart,
+    ...prevRest
+  } = prevProps;
+  const {
+    columns: nextColumns = nextProps.data ? nextProps.data.length : 0,
+    cursorOffset: nextCursorOffset,
+    cursorRow: nextCursorRow,
+    offset: nextOffset = 0,
+    rowIndex: nextRowIndex,
+    selectionEnd: nextSelectionEnd,
+    selectionStart: nextSelectionStart,
+    ...nextRest
+  } = nextProps;
+
+  if (prevRowIndex !== nextRowIndex || prevColumns !== nextColumns || prevOffset !== nextOffset) {
+    return false;
+  }
+
+  if (prevCursorRow !== nextCursorRow && (prevRowIndex === prevCursorRow || nextRowIndex === nextCursorRow)) {
+    return false;
+  }
+
+  const prevOffsetEnd = prevOffset + prevColumns;
+  const nextOffsetEnd = nextOffset + nextColumns;
+
+  if (prevCursorOffset != null && nextCursorOffset != null) {
+    if (hasSelection(prevOffset, prevOffsetEnd, prevCursorOffset)) {
+      return false;
+    }
+
+    if (hasSelection(nextOffset, nextOffsetEnd, nextCursorOffset)) {
+      return false;
+    }
+  }
+
+  if (
+    prevSelectionStart != null && prevSelectionEnd != null
+    && nextSelectionStart != null && nextSelectionEnd != null
+  ) {
+    const prevHasSelection = hasSelection(prevOffset, prevOffsetEnd, prevSelectionStart, prevSelectionEnd);
+    const nextHasSelection = hasSelection(nextOffset, nextOffsetEnd, nextSelectionStart, nextSelectionEnd);
+
+    if (prevHasSelection !== nextHasSelection) {
+      return false;
+    }
+
+    if (prevSelectionStart !== nextSelectionStart) {
+      if (hasSelection(prevOffset, prevOffsetEnd, prevSelectionStart)) {
+        return false;
+      }
+
+      if (hasSelection(nextOffset, nextOffsetEnd, nextSelectionStart)) {
+        return false;
+      }
+    }
+
+    if (prevSelectionEnd !== nextSelectionEnd) {
+      if (hasSelection(prevOffset, prevOffsetEnd, prevSelectionEnd)) {
+        return false;
+      }
+
+      if (hasSelection(nextOffset, nextOffsetEnd, nextSelectionEnd)) {
+        return false;
+      }
+    }
+  }
+
+  return areEqual(prevRest, nextRest);
+}
+
+const HexEditorRow = ({
   className = '',
-  classNames = {},
+  classNames = EMPTY_CLASSNAMES,
   columns,
   cursorColumn,
   cursorOffset,
@@ -82,8 +165,8 @@ const HexEditorRow = forwardRef(({
   showAscii = true,
   showLabel = true,
   style,
-  styles = {},
-}: IHexEditorRowProps, ref: React.Ref<HTMLDivElement>) => {
+  styles = EMPTY_INLINE_STYLES,
+}: HexEditorRowProps, ref: React.Ref<HTMLDivElement>) => {
   const dataOffsets = useMemo(() => {
     return new Array(columns == null ? data.length - dataOffset : columns)
       .fill(0)
@@ -208,6 +291,8 @@ const HexEditorRow = forwardRef(({
       )}
     </div>
   );
-});
+};
 
-export default memo(HexEditorRow);
+HexEditorRow.displayName = 'HexEditorRow';
+
+export default memo(forwardRef(HexEditorRow), areRowPropsEquivalent);

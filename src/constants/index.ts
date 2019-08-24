@@ -17,6 +17,11 @@ import {
   KEY_F,
 } from 'keycode-js';
 
+import {
+  HexEditorClassNames,
+  HexEditorInlineStyles,
+} from '../types';
+
 export const EDIT_MODE_HEX = 'hex';
 export const EDIT_MODE_ASCII = 'ascii';
 
@@ -42,3 +47,6 @@ export const KEY_VALUES = {
   [KEY_E]: 0xe,
   [KEY_F]: 0xf,
 };
+
+export const EMPTY_CLASSNAMES: HexEditorClassNames = {};
+export const EMPTY_INLINE_STYLES: HexEditorInlineStyles = {};
