@@ -46,6 +46,7 @@ const App: React.FC<{ className?: string }> = ({ className = '' }) => {
         }}
       >
         <StyledAutoSizeHexEditor
+          autoFocus
           // columns={0x10}
           data={data.current}
           // height={400}

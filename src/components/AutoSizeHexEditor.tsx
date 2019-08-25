@@ -18,10 +18,7 @@ import INLINE_STYLES, {
   CONTAINER_STYLE,
   MEASURE_STYLE,
 } from '../constants/inlineStyles';
-import {
-  formatHex,
-  getScrollbarSize,
-} from '../utils';
+import { formatHex } from '../utils';
 
 import HexEditor from './HexEditor';
 import HexEditorMeasureRow from './HexEditorMeasureRow';
@@ -34,6 +31,7 @@ interface State {
   labelWidth: number,
   rowHeight: number,
   rows: number,
+  scrollbarWidth: number,
 };
 
 interface Action {
@@ -44,9 +42,11 @@ interface Action {
   labelWidth?: number,
   rowHeight?: number,
   rows?: number,
+  scrollbarWidth?: number,
 };
 
 export interface AutoSizeHexEditorProps {
+  autoFocus?: boolean,
   asciiWidth?: number,
   byteWidth?: number,
   className?: string,
@@ -69,6 +69,7 @@ export interface AutoSizeHexEditorProps {
   readOnly?: boolean,
   rowHeight?: number,
   rows?: number,
+  scrollbarWidth?: number,
   showAscii?: boolean,
   showColumnLabels?: boolean,
   showRowLabels?: boolean,
@@ -93,11 +94,10 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
   measureStyle = MEASURE_STYLE,
   rowHeight: explicitRowHeight,
   rows: explicitRows,
+  scrollbarWidth: explicitScrollbarWidth,
   width: explicitWidth,
   ...props
 }, ref) => {
-  const [scrollbarWidth] = useMemo(() => getScrollbarSize(), []);
-
   const [state, setState] = useReducer(reducer, {
     asciiWidth: explicitAsciiWidth || 10,
     byteWidth: explicitByteWidth || 20,
@@ -106,14 +106,23 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
     labelWidth: explicitLabelWidth || 80,
     rowHeight: explicitRowHeight || 20,
     rows: explicitRows || 0x10,
+    scrollbarWidth: explicitScrollbarWidth || 0,
   });
 
-  const handleMeasure = useCallback(({ asciiWidth, byteWidth, gutterWidth, labelWidth, rowHeight }: {
+  const handleMeasure = useCallback(({
+    asciiWidth,
+    byteWidth,
+    gutterWidth,
+    labelWidth,
+    rowHeight,
+    scrollbarWidth,
+  }: {
     asciiWidth: number,
     byteWidth: number,
     gutterWidth: number,
     labelWidth: number,
     rowHeight: number,
+    scrollbarWidth: number,
   }) => {
     setState({
       asciiWidth: explicitAsciiWidth == null ? asciiWidth : explicitAsciiWidth,
@@ -121,8 +130,16 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
       gutterWidth: explicitGutterWidth == null? gutterWidth : explicitGutterWidth,
       labelWidth: explicitLabelWidth == null ? labelWidth : explicitLabelWidth,
       rowHeight: explicitRowHeight == null ? rowHeight : explicitRowHeight,
+      scrollbarWidth: explicitScrollbarWidth == null ? scrollbarWidth : explicitScrollbarWidth,
     });
-  }, [explicitAsciiWidth, explicitByteWidth, explicitGutterWidth, explicitLabelWidth, explicitRowHeight]);
+  }, [
+    explicitAsciiWidth,
+    explicitByteWidth,
+    explicitGutterWidth,
+    explicitLabelWidth,
+    explicitRowHeight,
+    explicitScrollbarWidth,
+  ]);
 
   const formatOffset = useMemo(() => {
     const padToLength = 2 * Math.ceil(formatHex(Math.max(0, props.data.length - 1)).length / 2);
@@ -164,7 +181,7 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
           let columns = explicitColumns;
           if (columns != null && width == null) {
             // Calculate width from the columns and component measurements
-            width = scrollbarWidth;
+            width = state.scrollbarWidth;
             if (props.showRowLabels) {
               width += state.labelWidth + state.gutterWidth;
             }
@@ -175,7 +192,7 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
             width = Math.ceil(width);
           } else if (width != null) {
             // Determine the number of columns using the width
-            let remainingWidth = width - scrollbarWidth;
+            let remainingWidth = width - state.scrollbarWidth;
             if (props.showRowLabels) {
               remainingWidth -= state.labelWidth + state.gutterWidth;
             }

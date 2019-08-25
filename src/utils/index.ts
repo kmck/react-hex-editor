@@ -1,8 +1,15 @@
 export const ASCII_LOOKUP = new Array(0x100).fill(0)
   .map((_v, i: number) => (i >= 0x20 && i < 0x80 ? String.fromCodePoint(i) : '.'));
 
+const REGEX_MAC_LIKE = /Mac|iPhone|iPod|iPad/;
+
+export function isMacLike() {
+  return REGEX_MAC_LIKE.test(navigator.platform);
+}
+
 export function getScrollbarSize(parentNode = document.body) {
   const outer = document.createElement('div');
+  outer.setAttribute('data-measure-scrollbar', 'true');
   outer.style.visibility = 'hidden';
   outer.style.overflow = 'scroll';
   outer.style.msOverflowStyle = 'scrollbar';

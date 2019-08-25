@@ -10,6 +10,8 @@ import {
   EMPTY_INLINE_STYLES,
 } from '../constants';
 
+import { getScrollbarSize } from '../utils';
+
 import HexOffsetLabel from './HexOffsetLabel';
 import HexEditorGutter from './HexEditorGutter';
 import HexByteValue from './HexByteValue';
@@ -33,6 +35,7 @@ interface Props {
     gutterWidth: number,
     labelWidth: number,
     rowHeight: number,
+    scrollbarWidth: number,
   }) => void,
   rowHeight?: number,
   style?: React.CSSProperties | null,
@@ -57,18 +60,23 @@ const HexEditorMeasureRow = ({
   style,
   value = 0,
 }: Props) => {
+  const measureContainerRef = useRef<HTMLDivElement>(null);
   const measureGutterRef = useRef<HTMLDivElement>(null);
   const measureLabelRef = useRef<HTMLDivElement>(null);
   const measureByteRef = useRef<HTMLDivElement>(null);
   const measureAsciiRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
+    let scrollbarWidth = 0;
     let gutterWidth = 0;
     let asciiWidth = 0;
     let byteWidth = 0;
     let labelWidth = 0;
     let rowHeight = 0;
 
+    if (measureContainerRef.current) {
+      [scrollbarWidth] = getScrollbarSize(measureContainerRef.current);
+    }
     if (measureGutterRef.current) {
       const gutterRect = measureGutterRef.current.getBoundingClientRect();
       gutterWidth = gutterRect.width;
@@ -97,12 +105,13 @@ const HexEditorMeasureRow = ({
         gutterWidth,
         labelWidth,
         rowHeight,
+        scrollbarWidth,
       });
     }
   }, [onMeasure]);
 
   return (
-    <div className={className} style={style || undefined}>
+    <div className={className} style={style || undefined} ref={measureContainerRef}>
       <HexEditorGutter
         className={classNames.gutter}
         ref={measureGutterRef}

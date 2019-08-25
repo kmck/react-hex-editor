@@ -194,10 +194,8 @@ Set it, if you want!
 
 ## @TODO
 
-- `props.autoFocus`
 - Improve clipboard support
 - Undo/redo history
-- Improve keyboard shortcut support
 - Text/byte search
 
 

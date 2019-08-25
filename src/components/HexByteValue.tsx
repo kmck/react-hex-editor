@@ -79,7 +79,7 @@ const HexByte = ({
   }, [isCursor, isSelectionCursor]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (setSelectionStart && e.button === 0) {
+    if (setSelectionStart && e.button === 0 && !e.ctrlKey) {
       if (e.shiftKey) {
         e.preventDefault();
       } else {

@@ -9,6 +9,7 @@ export const hexEditorTheme = <K extends keyof HexEditorTheme>(key: K) =>
     const value = hexEditor[key] || defaultTheme[key];
     return typeof value === 'number' ? `${value}px` : value;
   };
+
 export default css`
   font-family: ${hexEditorTheme('fontFamily')};
   font-size: ${hexEditorTheme('fontSize')};
@@ -38,9 +39,14 @@ export default css`
     overflow-x: hidden;
     overflow-y: scroll;
     box-sizing: border-box;
+  }
 
+  [data-measure-scrollbar],
+  .hexEditorHeader,
+  .hexEditorBody {
     &::-webkit-scrollbar {
       width: auto;
+      height: 0;
     }
 
     &::-webkit-scrollbar-thumb {

@@ -22,6 +22,7 @@ import {
   KEY_BACK_SPACE,
   KEY_DELETE,
   KEY_DOWN,
+  KEY_E,
   KEY_END,
   KEY_HOME,
   KEY_LEFT,
@@ -51,6 +52,7 @@ import {
   byteToAscii,
   formatHex,
   formatHexByte,
+  isMacLike,
 } from '../utils';
 
 import CLASS_NAMES from '../constants/classNames';
@@ -92,6 +94,7 @@ interface Action {
 };
 
 export interface HexEditorProps {
+  autoFocus?: boolean,
   className?: string,
   classNames?: HexEditorClassNames,
   columns: number,
@@ -120,6 +123,7 @@ export interface HexEditorProps {
 const reducer = (prevState: State, mergeState: Action) => ({ ...prevState, ...mergeState });
 
 const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
+  autoFocus = false,
   className,
   classNames = CLASS_NAMES,
   columns,
@@ -320,12 +324,17 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     e?: React.MouseEvent,
   ) => {
     const {
+      editMode: prevEditMode,
       selectionAnchor,
       selectionEnd,
       selectionStart,
     } = stateRef.current;
 
     if (selectionAnchor != null) {
+      if (e && editMode !== prevEditMode) {
+        return;
+      }
+
       if (editMode != null) {
         setState({ editMode });
       }
@@ -406,19 +415,20 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     const dataLength = data.length;
 
     const isSelection = selectionStart !== selectionEnd;
+    const isMacKeyboard = isMacLike();
 
     switch (true) {
       // Select all
-      case ctrlKey && which === KEY_A:
-      case metaKey && which === KEY_A: {
+      case !isMacKeyboard && ctrlKey && which === KEY_A:
+      case isMacKeyboard && metaKey && which === KEY_A: {
         setSelectionRange(0, dataLength);
         e.preventDefault();
         return;
       }
 
       // Go to first character
-      case metaKey && which === KEY_UP:
-      case ctrlKey && which === KEY_HOME: {
+      case isMacKeyboard && metaKey && which === KEY_UP:
+      case !isMacKeyboard && ctrlKey && which === KEY_HOME: {
         if (shiftKey) {
           const end = selectionDirection === SELECTION_DIRECTION_BACKWARD
             ? selectionEnd
@@ -432,8 +442,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       }
 
       // Go to last character
-      case metaKey && which === KEY_DOWN:
-      case ctrlKey && which === KEY_END: {
+      case isMacKeyboard && metaKey && which === KEY_DOWN:
+      case !isMacKeyboard && ctrlKey && which === KEY_END: {
         if (shiftKey) {
           const start = selectionDirection === SELECTION_DIRECTION_BACKWARD
             ? selectionEnd
@@ -459,7 +469,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       }
 
       // Go to start of line
-      case metaKey && which === KEY_LEFT:
+      case isMacKeyboard && ctrlKey && which === KEY_A:
+      case isMacKeyboard && metaKey && which === KEY_LEFT:
       case which === KEY_HOME: {
         const selectionAnchor = selectionDirection === SELECTION_DIRECTION_BACKWARD
           ? selectionStart
@@ -480,7 +491,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       }
 
       // Go to end of line
-      case metaKey && which === KEY_RIGHT:
+      case isMacKeyboard && ctrlKey && which === KEY_E:
+      case isMacKeyboard && metaKey && which === KEY_RIGHT:
       case which === KEY_END: {
         const selectionAnchor = selectionDirection === SELECTION_DIRECTION_BACKWARD
           ? selectionStart
@@ -659,6 +671,12 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   }: ListOnItemsRenderedProps) => {
     setState({ visibleStartIndex, visibleStopIndex });
   }, []);
+
+  useLayoutEffect(() => {
+    if (autoFocus) {
+      focus();
+    }
+  }, [autoFocus, focus]);
 
   useLayoutEffect(() => {
     if (rowListRef.current) {
