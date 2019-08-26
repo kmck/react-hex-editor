@@ -122,11 +122,15 @@ _You probably don't need to use this._
 
 Classname applied to the Hex Editor's root element.
 
+###### `classNames`
+
+Classnames applied to various components of the Hex Editor that can be used for styling.
+
 ###### `data` (required)
 
 `Uint8Array` or array of integerss (0-255) to display in the hex editor.
 
-##### `nonce`
+###### `nonce`
 
 If `data` is mutable, update the `nonce` when there is a change so that the editor re-renders
 with the latest data.
@@ -298,7 +302,7 @@ Set to `true` if the Hex Editor is more of a Hex Viewer.
 Set it, if you want!
 
 
-##### Imperative Interface
+#### Imperative Interface
 
 The following functions are available is you use a `ref` on the Hex Editor.
 
@@ -330,9 +334,11 @@ Sets a value in the Hex Editor.
 
 ## @TODO
 
+- Improve documentation
 - Improve clipboard support
 - Undo/redo history
 - Text/byte search
+- Demo page
 
 
 ## Contributing
