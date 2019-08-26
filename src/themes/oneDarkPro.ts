@@ -1,8 +1,6 @@
-import { HexEditorTheme } from '../types';
-import defaultTheme from './default';
+import { HexEditorTheme } from '.';
 
 const hexEditorTheme: HexEditorTheme = {
-  ...defaultTheme,
   asciiPaddingX: 0,
   bytePaddingX: '0.1em',
   rowPaddingY: '0.1em',

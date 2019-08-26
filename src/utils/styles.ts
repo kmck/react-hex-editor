@@ -1,8 +1,6 @@
 import { css } from 'styled-components';
 
-import { HexEditorTheme } from '../types';
-
-import defaultTheme from '../themes/default';
+import defaultTheme, { HexEditorTheme } from '../themes';
 
 export const hexEditorTheme = <K extends keyof HexEditorTheme>(key: K) =>
   ({ theme: { hexEditor = defaultTheme } }: { theme: { hexEditor: HexEditorTheme } }): HexEditorTheme[K] => {

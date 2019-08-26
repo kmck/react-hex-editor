@@ -1,9 +1,5 @@
 import { HexEditorInlineStyles } from '../types';
 
-export const CONTAINER_STYLE: React.CSSProperties = {
-  // position: 'relative',
-};
-
 export const EDITOR_STYLE: React.CSSProperties = {
   fontFamily: 'monospace',
   position: 'relative',

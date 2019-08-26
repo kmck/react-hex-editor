@@ -8,22 +8,18 @@ import React, {
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import {
+  AutoSizeHexEditorProps,
   HexEditorHandle,
-  HexEditorInlineStyles,
-  HexEditorClassNames,
 } from '../types';
 
 import CLASS_NAMES from '../constants/classNames';
-import INLINE_STYLES, {
-  CONTAINER_STYLE,
-  MEASURE_STYLE,
-} from '../constants/inlineStyles';
+import INLINE_STYLES, { MEASURE_STYLE } from '../constants/inlineStyles';
 import { formatHex } from '../utils';
 
 import HexEditor from './HexEditor';
 import HexEditorMeasureRow from './HexEditorMeasureRow';
 
-interface State {
+interface AutoSizeHexEditorState {
   asciiWidth: number,
   byteWidth: number,
   columns: number,
@@ -34,7 +30,7 @@ interface State {
   scrollbarWidth: number,
 };
 
-interface Action {
+interface AutoSizeHexEditorAction {
   asciiWidth?: number,
   byteWidth?: number,
   columns?: number,
@@ -45,48 +41,16 @@ interface Action {
   scrollbarWidth?: number,
 };
 
-export interface AutoSizeHexEditorProps {
-  autoFocus?: boolean,
-  asciiWidth?: number,
-  byteWidth?: number,
-  className?: string,
-  classNames?: HexEditorClassNames,
-  columns?: number,
-  containerClassName?: string,
-  containerStyle?: React.CSSProperties | null,
-  data: Uint8Array | number[],
-  formatValue?: (value: number) => string,
-  gutterWidth?: number,
-  height?: number,
-  inlineStyles?: HexEditorInlineStyles,
-  inputStyle?: React.CSSProperties | null,
-  labelWidth?: number,
-  measureStyle?: React.CSSProperties | null,
-  nonce?: number | string,
-  onBlur?: (e: React.FocusEvent) => void,
-  onFocus?: (e: React.FocusEvent) => void,
-  onSetValue?: (offset: number, value: number) => void,
-  readOnly?: boolean,
-  rowHeight?: number,
-  rows?: number,
-  scrollbarWidth?: number,
-  showAscii?: boolean,
-  showColumnLabels?: boolean,
-  showRowLabels?: boolean,
-  style?: React.CSSProperties | null,
-  tabIndex?: number,
-  width?: number,
-};
-
-const reducer = (prevState: State, mergeState: Action) => ({ ...prevState, ...mergeState });
+const reducer = (
+  prevState: AutoSizeHexEditorState,
+  mergeState: AutoSizeHexEditorAction
+) => ({ ...prevState, ...mergeState });
 
 const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeHexEditorProps> = ({
   asciiWidth: explicitAsciiWidth,
   byteWidth: explicitByteWidth,
   classNames = CLASS_NAMES,
   columns: explicitColumns,
-  containerClassName,
-  containerStyle = CONTAINER_STYLE,
   gutterWidth: explicitGutterWidth,
   height: explicitHeight,
   inlineStyles = INLINE_STYLES,

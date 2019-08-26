@@ -5,7 +5,7 @@ import HexEditorContext from '../contexts/HexEditorContext';
 
 import HexEditorRow from './HexEditorRow';
 
-const HexEditorBodyRow = ({ index: rowIndex, isScrolling, style: itemStyle }: ListChildComponentProps) => {
+const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildComponentProps) => {
   const {
     classNames,
     columns,

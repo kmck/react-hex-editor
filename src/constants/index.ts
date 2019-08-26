@@ -29,7 +29,7 @@ export const SELECTION_DIRECTION_FORWARD = 'forward';
 export const SELECTION_DIRECTION_BACKWARD = 'backward';
 export const SELECTION_DIRECTION_NONE = 'none';
 
-export const KEY_VALUES = {
+export const KEY_VALUES: { [key: number]: number } = {
   [KEY_0]: 0x0,
   [KEY_1]: 0x1,
   [KEY_2]: 0x2,

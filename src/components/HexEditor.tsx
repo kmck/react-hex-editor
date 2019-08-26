@@ -26,6 +26,8 @@ import {
   KEY_END,
   KEY_HOME,
   KEY_LEFT,
+  KEY_PAGE_DOWN,
+  KEY_PAGE_UP,
   KEY_RIGHT,
   KEY_TAB,
   KEY_UP,
@@ -33,9 +35,8 @@ import {
 
 import {
   EditModeType,
-  HexEditorClassNames,
   HexEditorHandle,
-  HexEditorInlineStyles,
+  HexEditorProps,
   SelectionDirectionType,
 } from '../types';
 
@@ -63,7 +64,7 @@ import HexEditorRow from './HexEditorRow';
 import HexEditorContext, { HexEditorContextInterface } from '../contexts/HexEditorContext';
 import HexEditorBody from './HexEditorBody';
 
-interface State {
+interface HexEditorState {
   cursorOffset: number,
   editMode: EditModeType,
   isFocused: boolean,
@@ -78,7 +79,7 @@ interface State {
   visibleStopIndex: number,
 };
 
-interface Action {
+interface HexEditorAction {
   cursorOffset?: number,
   editMode?: EditModeType,
   isFocused?: boolean,
@@ -93,34 +94,10 @@ interface Action {
   visibleStopIndex?: number,
 };
 
-export interface HexEditorProps {
-  autoFocus?: boolean,
-  className?: string,
-  classNames?: HexEditorClassNames,
-  columns: number,
-  data: Uint8Array | number[],
-  formatValue?: (value: number) => string,
-  inlineStyles?: HexEditorInlineStyles,
-  height: number,
-  highlightColumn?: boolean,
-  inputStyle?: React.CSSProperties | null,
-  nonce?: number | string,
-  onBlur?: (e: React.FocusEvent) => void,
-  onFocus?: (e: React.FocusEvent) => void,
-  onSetValue?: (offset: number, value: number) => void,
-  overscanCount?: number,
-  readOnly?: boolean,
-  rowHeight: number,
-  rows: number,
-  showAscii?: boolean,
-  showColumnLabels?: boolean,
-  showRowLabels?: boolean,
-  style?: React.CSSProperties | null,
-  tabIndex?: number,
-  width: number,
-};
-
-const reducer = (prevState: State, mergeState: Action) => ({ ...prevState, ...mergeState });
+const reducer = (
+  prevState: HexEditorState,
+  mergeState: HexEditorAction,
+) => ({ ...prevState, ...mergeState });
 
 const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
   autoFocus = false,
@@ -378,21 +355,21 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     setValue,
   }), [blur, focus, scrollTo, scrollToItem, setSelectionRange, setValue]);
 
-  const handleBlur = useCallback((e) => {
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setState({ isFocused: false });
     if (onBlur) {
       onBlur(e);
     }
   }, [onBlur]);
 
-  const handleFocus = useCallback((e) => {
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setState({ isFocused: true });
     if (onFocus) {
       onFocus(e);
     }
   }, [onFocus]);
 
-  const handleKeyDown = useCallback((e) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     const {
       which,
       shiftKey,
@@ -407,6 +384,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       nybbleHigh,
       nybbleOffset,
       readOnly,
+      rows,
       selectionStart,
       selectionEnd,
       selectionDirection,
@@ -416,6 +394,15 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
 
     const isSelection = selectionStart !== selectionEnd;
     const isMacKeyboard = isMacLike();
+
+    const offsetAmounts: { [key: number]: number } = {
+      [KEY_DOWN]: columns,
+      [KEY_LEFT]: 1,
+      [KEY_PAGE_DOWN]: rows * columns,
+      [KEY_PAGE_UP]: rows * columns,
+      [KEY_RIGHT]: 1,
+      [KEY_UP]: columns,
+    };
 
     switch (true) {
       // Select all
@@ -517,9 +504,10 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
         return;
 
       // Go back one row or column
+      case which === KEY_PAGE_UP:
       case which === KEY_UP:
       case which === KEY_LEFT: {
-        const offset = which === KEY_UP ? columns : 1;
+        const offset = offsetAmounts[which] || 1;
         if (shiftKey) {
           if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
             setSelectionRange(selectionEnd, selectionStart - offset);
@@ -537,9 +525,10 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       }
 
       // Go forward one row or column
+      case which === KEY_PAGE_DOWN:
       case which === KEY_DOWN:
       case which === KEY_RIGHT: {
-        const offset = which === KEY_DOWN ? columns : 1;
+        const offset = offsetAmounts[which] || 1;
         if (shiftKey) {
           if (selectionDirection === SELECTION_DIRECTION_BACKWARD) {
             setSelectionRange(selectionEnd, selectionStart + offset);
@@ -625,7 +614,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
       // Edit ascii value
       case editMode === EDIT_MODE_ASCII: {
         if (!readOnly) {
-          const key = Keycoder.fromEvent(e);
+          const key = Keycoder.fromEvent(e.nativeEvent);
           if (key.isPrintableCharacter && key.charCode != null) {
             const value = shiftKey ? key.shift.charCode : key.charCode;
             if (value != null) {
@@ -644,7 +633,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     }
   }, [setValue, setSelectionRange]);
 
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
     const {
       cursorOffset,
       data,

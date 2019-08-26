@@ -3,30 +3,21 @@
   "description": "View and edit binary data in React.",
   "version": "0.1.0",
   "license": "ISC",
+  "repository": "kmck/react-hex-editor",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "jsnext:main": "dist/index.es.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "clean": "rm -rf dist && rm -rf themes",
+    "build": "rollup -c",
+    "start": "rollup -c -w",
+    "lint": "eslint \"src/**/*.ts\" \"src/**/*.tsx\"",
+    "test": "echo \"@TODO\""
   },
   "dependencies": {
     "classnames": "^2.2.6",
-    "keycode-js": "^1.0.4",
+    "keycode-js": "^2.0.1",
     "keycoder": "^1.1.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.5"
@@ -36,18 +27,48 @@
     "styled-components": "^4.3.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.3.3",
     "@types/classnames": "^2.2.9",
-    "@types/jest": "24.0.16",
-    "@types/node": "12.6.9",
-    "@types/react": "16.8.24",
-    "@types/react-dom": "16.8.5",
+    "@types/jest": "24.0.18",
+    "@types/node": "12.7.2",
+    "@types/react": "16.9.2",
+    "@types/react-dom": "16.9.0",
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.1",
     "@types/styled-components": "^4.1.18",
+    "@typescript-eslint/eslint-plugin": "2.0.0",
+    "@typescript-eslint/parser": "2.0.0",
+    "babel-eslint": "10.0.3",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-named-asset-import": "^0.3.2",
+    "eslint": "^6.2.2",
+    "eslint-config-react-app": "^5.0.1",
+    "eslint-plugin-flowtype": "4.2.0",
+    "eslint-plugin-import": "2.18.2",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-react": "7.14.3",
+    "eslint-plugin-react-hooks": "^2.0.1",
+    "jest": "24.9.0",
+    "jest-environment-jsdom-fourteen": "0.1.0",
+    "jest-resolve": "24.9.0",
+    "jest-watch-typeahead": "0.4.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
+    "rollup": "^1.20.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.0.2",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "rollup-plugin-typescript2": "^0.23.0",
     "styled-components": "^4.3.2",
     "typescript": "3.5.3"
-  }
+  },
+  "files": [
+    "dist",
+    "lib",
+    "themes"
+  ]
 }

@@ -11,7 +11,7 @@ import {
 
 import HexEditorBodyRow from './HexEditorBodyRow';
 
-export interface HexEditorProps {
+export interface HexEditorBodyProps {
   className?: string,
   height: number,
   itemRenderer?: React.ComponentType<ListChildComponentProps>,
@@ -25,7 +25,7 @@ export interface HexEditorProps {
   width: number,
 };
 
-const HexEditorBody: React.RefForwardingComponent<List, HexEditorProps> = ({
+const HexEditorBody: React.RefForwardingComponent<List, HexEditorBodyProps> = ({
   className = undefined,
   height,
   itemRenderer = HexEditorBodyRow,
@@ -34,7 +34,6 @@ const HexEditorBody: React.RefForwardingComponent<List, HexEditorProps> = ({
   overscanCount,
   rowCount,
   rowHeight,
-  rows,
   style,
   width,
 }, ref) => {
