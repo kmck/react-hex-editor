@@ -3,6 +3,7 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import joinClassNames from 'classnames';
@@ -11,6 +12,7 @@ import {
   HexEditorClassNames,
   SetSelectionBoundaryCallback,
   SetSelectionRangeCallback,
+  ValueFormatter,
 } from '../types';
 import {
   EDIT_MODE_ASCII,
@@ -18,12 +20,11 @@ import {
 } from '../constants';
 import { byteToAscii } from '../utils';
 
-
 interface Props {
   className?: string,
   classNames?: HexEditorClassNames,
   columnIndex?: number,
-  formatValue?: (value: number) => string,
+  formatValue?: ValueFormatter,
   isCursor?: boolean,
   isEditing?: boolean,
   isSelected?: boolean,
@@ -31,6 +32,7 @@ interface Props {
   isSelectionEnd?: boolean,
   isSelectionStart?: boolean,
   offset?: number,
+  placeholder?: string | JSX.Element | null,
   rowIndex?: number,
   setSelectionEnd?: SetSelectionBoundaryCallback,
   setSelectionRange?: SetSelectionRangeCallback,
@@ -49,6 +51,7 @@ const HexByteAscii = ({
   isSelectionEnd,
   isSelectionStart,
   offset = 0,
+  placeholder,
   setSelectionEnd,
   setSelectionRange,
   setSelectionStart,
@@ -56,6 +59,11 @@ const HexByteAscii = ({
   value = 0x00,
 }: Props, ref: React.Ref<HTMLDivElement>) => {
   const [highlight, setHighlight] = useState(false);
+
+  const formattedValue = useMemo(
+    () => (formatValue && value != null ? formatValue(value) : value),
+    [value, formatValue],
+  );
 
   useEffect(() => {
     if (isCursor || isSelectionCursor) {
@@ -126,10 +134,14 @@ const HexByteAscii = ({
       ref={ref}
       style={style}
     >
-      <span style={{ position :'absolute' }}>
-        {value != null ? formatValue(value) : value}
-      </span>
-      &nbsp;
+      {placeholder == null ? formattedValue : (
+        <>
+          <span style={{ position: 'absolute' }}>
+            {formattedValue}
+          </span>
+          {placeholder}
+        </>
+      )}
     </div>
   );
 };

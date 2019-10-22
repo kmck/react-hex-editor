@@ -7,6 +7,7 @@ import HexEditorRow from './HexEditorRow';
 
 const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildComponentProps) => {
   const {
+    asciiPlaceholder,
     classNames,
     columns,
     cursorColumn,
@@ -31,6 +32,7 @@ const HexEditorBodyRow = ({ index: rowIndex, style: itemStyle }: ListChildCompon
 
   return (
     <HexEditorRow
+      asciiPlaceholder={asciiPlaceholder}
       className={classNames.row}
       classNames={classNames}
       columns={columns}

@@ -1,21 +1,25 @@
 import React, {
   forwardRef,
   memo,
+  useMemo,
 } from 'react';
 import {
+  FixedSizeList as List,
   ListChildComponentProps,
   ListOnItemsRenderedProps,
   ListOnScrollProps,
-  FixedSizeList as List,
 } from 'react-window';
+
+import { HexEditorBodyChildren } from '../types';
 
 import HexEditorBodyRow from './HexEditorBodyRow';
 
 export interface HexEditorBodyProps {
+  children?: HexEditorBodyChildren,
   className?: string,
   height: number,
   itemRenderer?: React.ComponentType<ListChildComponentProps>,
-  onItemsRendered?: (props: ListOnItemsRenderedProps) => any,
+  onItemsRendered: (props: ListOnItemsRenderedProps) => any,
   onScroll?: (props: ListOnScrollProps) => any,
   overscanCount: number,
   rowCount: number,
@@ -26,6 +30,7 @@ export interface HexEditorBodyProps {
 };
 
 const HexEditorBody: React.RefForwardingComponent<List, HexEditorBodyProps> = ({
+  children: bodyChildren,
   className = undefined,
   height,
   itemRenderer = HexEditorBodyRow,
@@ -34,13 +39,34 @@ const HexEditorBody: React.RefForwardingComponent<List, HexEditorBodyProps> = ({
   overscanCount,
   rowCount,
   rowHeight,
+  rows,
   style,
   width,
-}, ref) => {
+}, ref: React.Ref<List>) => {
+  const innerElementType = useMemo(() => {
+    if (bodyChildren) {
+      return forwardRef(({
+        children: listChildren,
+        ...props
+      }, ref: React.Ref<HTMLDivElement>) => (
+        <div ref={ref} {...props}>
+          {listChildren}
+          {(
+            typeof bodyChildren === 'function'
+              ? bodyChildren()
+              : bodyChildren
+          )}
+        </div>
+      ));
+    }
+    return 'div';
+  }, [bodyChildren]);
+
   return (
     <List
       className={className}
       height={height}
+      innerElementType={innerElementType}
       itemCount={rowCount}
       itemSize={rowHeight}
       layout="vertical"

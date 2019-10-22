@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import {
   HexEditorClassNames,
   HexEditorInlineStyles,
+  ValueFormatter,
 } from '../types';
 
 import {
@@ -18,6 +19,7 @@ import HexByteValue from './HexByteValue';
 import HexAsciiValue from './HexAsciiValue';
 
 interface Props {
+  asciiPlaceholder?: string | JSX.Element | null,
   asciiValue?: number,
   asciiWidth?: number,
   byteWidth?: number,
@@ -25,7 +27,7 @@ interface Props {
   classNames?: HexEditorClassNames,
   data?: Uint8Array | number[],
   formatOffset?: (offset: number) => string | number,
-  formatValue?: (value: number) => string,
+  formatValue?: ValueFormatter,
   gutterWidth?: number,
   labelWidth?: number,
   offset?: number,
@@ -44,6 +46,7 @@ interface Props {
 };
 
 const HexEditorMeasureRow = ({
+  asciiPlaceholder,
   asciiValue,
   asciiWidth: explicitAsciiWidth,
   byteWidth: explicitByteWidth,
@@ -135,6 +138,7 @@ const HexEditorMeasureRow = ({
         className={classNames.ascii}
         classNames={classNames}
         formatValue={formatValue}
+        placeholder={asciiPlaceholder}
         ref={measureAsciiRef}
         style={{ width: explicitAsciiWidth, height: explicitRowHeight, ...styles.ascii }}
         value={asciiValue == null ? value : asciiValue}

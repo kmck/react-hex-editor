@@ -6,11 +6,13 @@ import {
   SelectionDirectionType,
   SetSelectionBoundaryCallback,
   SetSelectionRangeCallback,
+  ValueFormatter,
 } from '../types';
 import { SELECTION_DIRECTION_NONE } from '../constants';
 import { formatHex } from '../utils';
 
 export interface HexEditorContextInterface {
+  asciiPlaceholder: string | JSX.Element | null,
   classNames: HexEditorClassNames,
   columns: number,
   cursorColumn?: number,
@@ -18,7 +20,7 @@ export interface HexEditorContextInterface {
   cursorRow?: number,
   data: Uint8Array | number[],
   formatOffset: (offset: number) => string,
-  formatValue: (offset: number) => string,
+  formatValue: ValueFormatter,
   isEditing: boolean,
   nonce?: number | string,
   nybbleHigh: number | null,
@@ -36,6 +38,7 @@ export interface HexEditorContextInterface {
 }
 
 const HexEditorContext = createContext<HexEditorContextInterface>({
+  asciiPlaceholder: null,
   classNames: {},
   columns: 1,
   cursorColumn: undefined,

@@ -1,4 +1,7 @@
-import { Align } from 'react-window';
+import {
+  Align,
+  ListOnItemsRenderedProps,
+} from 'react-window';
 
 import {
   EDIT_MODE_ASCII,
@@ -32,12 +35,18 @@ export type SetSelectionRangeCallback = (
   takeFocus?: boolean,
 ) => void;
 
+export type ValueFormatter = (value: number) => string | JSX.Element | null;
+
+export type HexEditorBodyChildren = JSX.Element | null | (() => JSX.Element);
+
 export interface BaseHexEditorProps {
+  asciiPlaceholder?: string | JSX.Element | null,
   autoFocus?: boolean,
+  children?: HexEditorBodyChildren,
   className?: string,
   classNames?: HexEditorClassNames,
   data: Uint8Array | number[],
-  formatValue?: (value: number) => string,
+  formatValue?: ValueFormatter,
   inlineStyles?: HexEditorInlineStyles,
   highlightColumn?: boolean,
   inputStyle?: React.CSSProperties | null,
@@ -45,6 +54,7 @@ export interface BaseHexEditorProps {
   onBlur?: (e: React.FocusEvent) => void,
   onFocus?: (e: React.FocusEvent) => void,
   onSetValue?: (offset: number, value: number) => void,
+  onItemsRendered?: (props: ListOnItemsRenderedProps) => void,
   overscanCount?: number,
   readOnly?: boolean,
   showAscii?: boolean,

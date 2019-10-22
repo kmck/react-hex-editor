@@ -11,6 +11,7 @@ import {
   SetSelectionBoundaryCallback,
   HexEditorClassNames,
   HexEditorInlineStyles,
+  ValueFormatter,
 } from '../types';
 
 import {
@@ -27,6 +28,7 @@ import HexByteValue from './HexByteValue';
 import HexAsciiValue from './HexAsciiValue';
 
 export interface HexEditorRowProps {
+  asciiPlaceholder?: string | JSX.Element | null,
   className?: string,
   classNames?: HexEditorClassNames,
   columns?: number,
@@ -36,7 +38,7 @@ export interface HexEditorRowProps {
   data?: Uint8Array | number[],
   disabled?: boolean,
   formatOffset?: (offset: number) => string | number,
-  formatValue?: (value: number) => string,
+  formatValue?: ValueFormatter,
   isEditing?: boolean,
   isHeader?: boolean,
   labelOffset?: number | null,
@@ -66,6 +68,8 @@ function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEdito
     columns: prevColumns = prevProps.data ? prevProps.data.length : 0,
     cursorOffset: prevCursorOffset,
     cursorRow: prevCursorRow,
+    isEditing: prevIsEditing,
+    nybbleHigh: prevNybbleHigh,
     offset: prevOffset = 0,
     rowIndex: prevRowIndex,
     selectionEnd: prevSelectionEnd,
@@ -76,6 +80,8 @@ function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEdito
     columns: nextColumns = nextProps.data ? nextProps.data.length : 0,
     cursorOffset: nextCursorOffset,
     cursorRow: nextCursorRow,
+    isEditing: nextIsEditing,
+    nybbleHigh: nextNybbleHigh,
     offset: nextOffset = 0,
     rowIndex: nextRowIndex,
     selectionEnd: nextSelectionEnd,
@@ -83,12 +89,22 @@ function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEdito
     ...nextRest
   } = nextProps;
 
+  // Row, column, or offset has changed
   if (prevRowIndex !== nextRowIndex || prevColumns !== nextColumns || prevOffset !== nextOffset) {
     return false;
   }
 
-  if (prevCursorRow !== nextCursorRow && (prevRowIndex === prevCursorRow || nextRowIndex === nextCursorRow)) {
-    return false;
+  // Cursor is or was on this row
+  if (prevRowIndex === prevCursorRow || nextRowIndex === nextCursorRow) {
+    // Cursor has moved to or from this row
+    if (prevCursorRow !== nextCursorRow) {
+      return false;
+    }
+
+    // Editing on this row
+    if (prevIsEditing !== nextIsEditing || prevNybbleHigh !== nextNybbleHigh) {
+      return false;
+    }
   }
 
   const prevOffsetEnd = prevOffset + prevColumns;
@@ -140,6 +156,7 @@ function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEdito
 }
 
 const HexEditorRow = ({
+  asciiPlaceholder,
   className = '',
   classNames = EMPTY_CLASSNAMES,
   columns,
@@ -277,6 +294,7 @@ const HexEditorRow = ({
                   isSelectionStart={isSelectionStart && !disabled}
                   key={offset}
                   offset={offset}
+                  placeholder={asciiPlaceholder}
                   rowIndex={rowIndex}
                   setSelectionEnd={setSelectionEnd}
                   setSelectionRange={setSelectionRange}

@@ -24,9 +24,12 @@ export default [
         rollupCommonJSResolveHack: true,
         tsconfigOverride: {
           compilerOptions: {
-            declarationDir: '.',
+            declarationDir: themeOut,
             noEmit: true,
           },
+          include: [
+            'src/themes/**/*',
+          ],
         },
         useTsconfigDeclarationDir: true,
       }),
@@ -46,7 +49,7 @@ export default [
         format: 'es',
         exports: 'named',
         sourcemap: true,
-      }
+      },
     ],
     plugins: [
       external({ includeDependencies: true }),

@@ -47,6 +47,7 @@ const reducer = (
 ) => ({ ...prevState, ...mergeState });
 
 const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeHexEditorProps> = ({
+  asciiPlaceholder,
   asciiWidth: explicitAsciiWidth,
   byteWidth: explicitByteWidth,
   classNames = CLASS_NAMES,
@@ -120,6 +121,7 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
   return (
     <>
       <HexEditorMeasureRow
+        asciiPlaceholder={asciiPlaceholder}
         asciiValue={0x41}
         asciiWidth={explicitAsciiWidth}
         byteWidth={explicitByteWidth}
@@ -196,6 +198,7 @@ const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeH
 
           return (
             <HexEditor
+              asciiPlaceholder={asciiPlaceholder}
               classNames={classNames}
               columns={columns}
               height={height}

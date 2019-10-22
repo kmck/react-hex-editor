@@ -70,6 +70,8 @@ interface HexEditorState {
   isFocused: boolean,
   nybbleHigh: number | null,
   nybbleOffset: number,
+  overscanStartIndex: number,
+  overscanStopIndex: number,
   selectionAnchor: number | null,
   selectionDirection: SelectionDirectionType,
   selectionEnd: number,
@@ -100,7 +102,9 @@ const reducer = (
 ) => ({ ...prevState, ...mergeState });
 
 const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
+  asciiPlaceholder = <>&nbsp;</>,
   autoFocus = false,
+  children,
   className,
   classNames = CLASS_NAMES,
   columns,
@@ -113,6 +117,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   nonce,
   onBlur,
   onFocus,
+  onItemsRendered,
   onSetValue,
   overscanCount,
   readOnly = false,
@@ -131,6 +136,8 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     isFocused: false,
     nybbleHigh: null,
     nybbleOffset: 0,
+    overscanStartIndex: 0,
+    overscanStopIndex: 0,
     selectionAnchor: null,
     selectionDirection: SELECTION_DIRECTION_NONE,
     selectionEnd: 0,
@@ -654,12 +661,12 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     setSelectionRange(Math.min(cursorOffset + values.length, dataLength - 1));
   }, [setValue, setSelectionRange]);
 
-  const handleItemsRendered = useCallback(({
-    visibleStartIndex,
-    visibleStopIndex,
-  }: ListOnItemsRenderedProps) => {
-    setState({ visibleStartIndex, visibleStopIndex });
-  }, []);
+  const handleItemsRendered = useCallback((props: ListOnItemsRenderedProps) => {
+    setState(props);
+    if (onItemsRendered) {
+      onItemsRendered(props);
+    }
+  }, [onItemsRendered]);
 
   useLayoutEffect(() => {
     if (autoFocus) {
@@ -741,6 +748,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   }), [inlineStyles.body]);
 
   const hexEditorContext: HexEditorContextInterface = useMemo(() => ({
+    asciiPlaceholder,
     classNames,
     columns,
     cursorColumn: highlightColumn ? cursorColumn : undefined,
@@ -764,6 +772,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     showRowLabels,
     styles: inlineStyles,
   }), [
+    asciiPlaceholder,
     classNames,
     columns,
     cursorColumn,
@@ -844,7 +853,9 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
           ref={rowListRef}
           style={bodyStyle}
           width={width}
-        />
+        >
+          {children}
+        </HexEditorBody>
       </div>
     </HexEditorContext.Provider>
   );
