@@ -1,7 +1,14 @@
 {
   "name": "react-hex-editor",
-  "description": "View and edit binary data in React.",
   "version": "0.2.0",
+  "description": "View and edit binary data in React.",
+  "keywords": [
+    "react",
+    "hex",
+    "editor",
+    "hexeditor",
+    "binary"
+  ],
   "license": "ISC",
   "repository": "kmck/react-hex-editor",
   "main": "dist/index.js",
