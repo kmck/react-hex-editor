@@ -60,9 +60,8 @@ import CLASS_NAMES from '../constants/classNames';
 
 import INLINE_STYLES, { INPUT_STYLE } from '../constants/inlineStyles';
 
-import HexEditorRow from './HexEditorRow';
 import HexEditorContext, { HexEditorContextInterface } from '../contexts/HexEditorContext';
-import HexEditorBody from './HexEditorBody';
+import HexEditorRows from './HexEditorRows';
 
 interface HexEditorState {
   cursorOffset: number,
@@ -152,7 +151,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     [columns],
   );
 
-  const rowListRef = useRef<List>(null);
+  const listRef = useRef<List>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const stateRef = useRef({
@@ -342,14 +341,14 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   }, [onSetValue]);
 
   const scrollTo = useCallback((scrollTop: number) => {
-    if (rowListRef.current) {
-      rowListRef.current.scrollTo(scrollTop);
+    if (listRef.current) {
+      listRef.current.scrollTo(scrollTop);
     }
   }, []);
 
   const scrollToItem = useCallback((rowIndex: number, align?: Align) => {
-    if (rowListRef.current) {
-      rowListRef.current.scrollToItem(rowIndex, align);
+    if (listRef.current) {
+      listRef.current.scrollToItem(rowIndex, align);
     }
   }, []);
 
@@ -675,16 +674,16 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   }, [autoFocus, focus]);
 
   useLayoutEffect(() => {
-    if (rowListRef.current) {
+    if (listRef.current) {
       const {
         visibleStartIndex,
         visibleStopIndex,
       } = stateRef.current;
       const rowIndex = Math.floor(state.cursorOffset / columns);
       if (rowIndex <= visibleStartIndex) {
-        rowListRef.current.scrollToItem(rowIndex, 'center');
+        listRef.current.scrollToItem(rowIndex, 'center');
       } else if (rowIndex >= visibleStopIndex) {
-        rowListRef.current.scrollToItem(rowIndex, 'center');
+        listRef.current.scrollToItem(rowIndex, 'center');
       }
     }
   }, [columns, state.cursorOffset]);
@@ -821,41 +820,21 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
           tabIndex={tabIndex}
           type="text"
         />
-        {!showColumnLabels ? null : (
-          <div className={classNames.header} style={headerStyle}>
-            <HexEditorRow
-              className={classNames.rowHeader}
-              classNames={classNames}
-              columns={columns}
-              cursorColumn={cursorColumn}
-              data={columnData}
-              disabled
-              formatOffset={formatHeaderOffset}
-              formatValue={formatHeaderValue}
-              isHeader
-              labelOffset={data.length}
-              nonce={nonce}
-              showAscii={showAscii}
-              showLabel={showRowLabels}
-              style={inlineStyles.row}
-              styles={inlineStyles}
-            />
-          </div>
-        )}
-        <HexEditorBody
+        <HexEditorRows
           className={classNames.body}
-          height={showColumnLabels ? height - rowHeight : height}
+          height={height}
           onItemsRendered={handleItemsRendered}
           overscanCount={overscanCount || rows}
           rowCount={rowCount}
           rowHeight={rowHeight}
           rows={rows}
-          ref={rowListRef}
+          ref={listRef}
+          showColumnLabels={showColumnLabels}
           style={bodyStyle}
           width={width}
         >
           {children}
-        </HexEditorBody>
+        </HexEditorRows>
       </div>
     </HexEditorContext.Provider>
   );

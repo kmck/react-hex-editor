@@ -86,6 +86,60 @@ export interface HexEditorProps extends BaseHexEditorProps {
   width: number,
 };
 
+export interface HexEditorRowBaseProps {
+  columns?: number,
+  cursorColumn?: number,
+  cursorOffset?: number,
+  cursorRow?: number,
+  data?: Uint8Array | number[],
+  disabled?: boolean,
+  isEditing?: boolean,
+  nonce?: number | string,
+  nybbleHigh?: number | null,
+  offset?: number,
+  rowIndex?: number,
+  rows?: number,
+  selectionDirection?: SelectionDirectionType,
+  selectionEnd?: number,
+  selectionStart?: number,
+  setSelectionEnd?: SetSelectionBoundaryCallback,
+  setSelectionRange?: (
+    start: number | null,
+    end?: number | null,
+    direction?: SelectionDirectionType | null,
+    takeFocus?: boolean,
+  ) => void,
+  setSelectionStart?: SetSelectionBoundaryCallback,
+};
+
+export interface HexEditorSectionProps extends HexEditorRowBaseProps {
+  dataOffsets: number[],
+};
+
+export type HexEditorSectionRenderer = (props: HexEditorSectionProps) => any;
+
+export interface HexEditorRowProps<K extends string = string> extends HexEditorRowBaseProps {
+  rowSectionRenderers: { [key in K]: HexEditorSectionRenderer },
+  rowSections: K[],
+  style?: React.CSSProperties,
+}
+
+export interface HexEditorValueProps {
+  columnIndex?: number,
+  isCurrentColumn?: boolean,
+  isCurrentRow?: boolean,
+  isCursor?: boolean,
+  isEditing?: boolean,
+  isSelected?: boolean,
+  isSelectionCursor?: boolean,
+  isSelectionEnd?: boolean,
+  isSelectionStart?: boolean,
+  offset?: number,
+  onClick?: (e: React.MouseEvent) => void,
+  rowIndex?: number,
+  value?: number | null,
+}
+
 export interface HexEditorHandle {
   blur(): void,
   focus(): void,

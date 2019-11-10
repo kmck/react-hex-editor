@@ -1,3 +1,5 @@
+import { SELECTION_DIRECTION_BACKWARD, SELECTION_DIRECTION_NONE } from '../constants';
+
 export const ASCII_LOOKUP = new Array(0x100).fill(0)
   .map((_v, i: number) => (i >= 0x20 && i < 0x80 ? String.fromCodePoint(i) : '.'));
 
@@ -59,4 +61,70 @@ export function hasSelection(
   }
   // Selection does not overlap range
   return false;
+}
+
+// Pulled from react-compat
+// https://github.com/developit/preact-compat/blob/7c5de00e7c85e2ffd011bf3af02899b63f699d3a/src/index.js#L349
+export function shallowDiffers(
+  prev: { [key: string]: any },
+  next: { [key: string]: any },
+): boolean {
+  for (let attribute in prev) {
+    if (!(attribute in next)) {
+      return true;
+    }
+  }
+  for (let attribute in next) {
+    if (prev[attribute] !== next[attribute]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function shallowDiffersForKeys(
+  prev: { [key: string]: any },
+  next: { [key: string]: any },
+  attributes: string[],
+): boolean {
+  for (let attribute in attributes) {
+    if (attribute in prev !== attribute in next) {
+      return true;
+    }
+    if (prev[attribute] !== next[attribute]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function getOffsetProperties({
+  columnIndex = -1,
+  cursorColumn = -1,
+  cursorOffset = -1,
+  isSelecting = false,
+  offset = -1,
+  selectionDirection = SELECTION_DIRECTION_NONE,
+  selectionEnd = -1,
+  selectionStart = -1,
+}) {
+  const isCurrentColumn = cursorColumn != null && columnIndex === cursorColumn;
+  const isCursor = offset === cursorOffset && !isSelecting;
+  const isSelected = offset >= selectionStart && offset < selectionEnd;
+  const isSelectionStart = offset === selectionStart;
+  const isSelectionEnd = offset === selectionEnd - 1;
+  const isSelectionCursor = isSelecting && (
+    selectionDirection === SELECTION_DIRECTION_BACKWARD
+      ? isSelectionStart
+      : isSelectionEnd
+  );
+
+  return {
+    isCurrentColumn,
+    isCursor,
+    isSelected,
+    isSelectionStart,
+    isSelectionEnd,
+    isSelectionCursor
+  };
 }
