@@ -11,7 +11,7 @@ import {
   FixedSizeList as List,
 } from 'react-window';
 
-import { HexEditorBodyChildren } from '../types';
+import { HexEditorBodyChildren, HexEditorSectionRenderer } from '../types';
 
 import HexEditorRow from './HexEditorRow';
 import HexEditorRowLabel from './HexEditorRowLabel';

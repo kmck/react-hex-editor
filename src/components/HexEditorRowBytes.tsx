@@ -4,10 +4,9 @@ import { HexEditorSectionProps, HexEditorValueProps } from '../types';
 import { shallowDiffersForKeys, getOffsetProperties } from '../utils';
 
 export interface HexEditorRowBytesProps extends HexEditorSectionProps {
-  children: (props: HexEditorValueProps) => any,
+  children?: (props: HexEditorValueProps) => any,
   className?: string,
   dataOffsets: number[],
-  formatValue?: (value: number) => string | number,
   isCurrentRow?: boolean,
   isSelecting?: boolean,
   style?: React.CSSProperties,
@@ -19,19 +18,27 @@ function arePropsEquivalent(prevProps: HexEditorRowBytesProps, nextProps: HexEdi
   return !shallowDiffersForKeys(prevProps, nextProps, checkProps);
 }
 
+const defaultByteRenderer = ({ value }: HexEditorValueProps) => (
+  <div>{value && value.toString(16).padStart(2, '0')}</div>
+);
+
 const HexEditorRowBytes = ({
+  children: HexEditorByte = defaultByteRenderer,
   className,
-  children: HexEditorByte,
   cursorColumn,
   cursorOffset,
   data,
   dataOffsets,
   disabled,
+  isEditing,
   isSelecting,
-  formatValue,
+  rowIndex,
   selectionDirection,
   selectionEnd,
   selectionStart,
+  setSelectionEnd,
+  setSelectionRange,
+  setSelectionStart,
   style,
 }: HexEditorRowBytesProps) => {
   return (
@@ -59,7 +66,6 @@ const HexEditorRowBytes = ({
         return (
           <HexEditorByte
             columnIndex={columnIndex}
-            formatValue={formatValue}
             isCursor={isCursor && !disabled}
             isEditing={isEditing && !disabled}
             isSelected={isSelected && !disabled}
@@ -69,9 +75,9 @@ const HexEditorRowBytes = ({
             key={offset}
             offset={offset}
             rowIndex={rowIndex}
-            setSelectionEnd={setSelectionEnd}
-            setSelectionRange={setSelectionRange}
-            setSelectionStart={setSelectionStart}
+            // setSelectionEnd={setSelectionEnd}
+            // setSelectionRange={setSelectionRange}
+            // setSelectionStart={setSelectionStart}
             value={value}
           />
         );

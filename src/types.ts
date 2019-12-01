@@ -93,7 +93,9 @@ export interface HexEditorRowBaseProps {
   cursorRow?: number,
   data?: Uint8Array | number[],
   disabled?: boolean,
+  isCurrentRow?: boolean,
   isEditing?: boolean,
+  isSelecting?: boolean,
   nonce?: number | string,
   nybbleHigh?: number | null,
   offset?: number,
@@ -103,12 +105,7 @@ export interface HexEditorRowBaseProps {
   selectionEnd?: number,
   selectionStart?: number,
   setSelectionEnd?: SetSelectionBoundaryCallback,
-  setSelectionRange?: (
-    start: number | null,
-    end?: number | null,
-    direction?: SelectionDirectionType | null,
-    takeFocus?: boolean,
-  ) => void,
+  setSelectionRange?: SetSelectionRangeCallback,
   setSelectionStart?: SetSelectionBoundaryCallback,
 };
 
@@ -145,12 +142,7 @@ export interface HexEditorHandle {
   focus(): void,
   scrollTo(scrollTop: number): void,
   scrollToItem(rowIndex: number, align: Align): void,
-  setSelectionRange(
-    start: number | null,
-    end?: number | null,
-    direction?: SelectionDirectionType | null,
-    takeFocus?: boolean,
-  ): void,
+  setSelectionRange: SetSelectionRangeCallback,
   setValue(offset: number, value: number): void,
 };
 

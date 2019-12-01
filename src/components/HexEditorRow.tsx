@@ -3,11 +3,12 @@ import joinClassNames from 'classnames';
 import { areEqual } from 'react-window';
 
 import {
-  HexEditorRowProps,
-  SelectionDirectionType,
-  SetSelectionBoundaryCallback,
   HexEditorClassNames,
   HexEditorInlineStyles,
+  HexEditorRowProps,
+  HexEditorSectionProps,
+  SelectionDirectionType,
+  SetSelectionBoundaryCallback,
   ValueFormatter,
 } from '../types';
 
@@ -111,21 +112,15 @@ function areRowPropsEquivalent(prevProps: HexEditorRowProps, nextProps: HexEdito
   return areEqual(prevRest, nextRest);
 }
 
-const HexEditorRow = (props: HexEditorRowProps, ref: React.Ref<HTMLDivElement>) => {
+const HexEditorRow = (props: HexEditorRowProps) => {
   const {
-    // asciiPlaceholder,
-    // className = '',
-    // classNames = EMPTY_CLASSNAMES,
     columns,
     cursorColumn,
     cursorOffset,
     cursorRow,
     data = [],
     disabled = false,
-    // formatOffset,
-    // formatValue,
     isEditing,
-    // labelOffset,
     nybbleHigh,
     offset: dataOffset = 0,
     rowIndex,
@@ -137,10 +132,6 @@ const HexEditorRow = (props: HexEditorRowProps, ref: React.Ref<HTMLDivElement>) 
     setSelectionEnd,
     setSelectionRange,
     setSelectionStart,
-    // showAscii = true,
-    // showLabel = true,
-    // style,
-    // styles = EMPTY_INLINE_STYLES,
   } = props;
 
   const {
@@ -157,10 +148,11 @@ const HexEditorRow = (props: HexEditorRowProps, ref: React.Ref<HTMLDivElement>) 
   const isSelecting = selectionEnd > selectionStart;
   const isCurrentRow = cursorRow != null && rowIndex === cursorRow;
 
-  const sectionProps = {
+  const sectionProps: HexEditorSectionProps = {
     ...props,
-    isSelecting,
+    dataOffsets,
     isCurrentRow,
+    isSelecting,
   };
 
   return (
