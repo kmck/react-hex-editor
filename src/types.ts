@@ -40,7 +40,6 @@ export type ValueFormatter = (value: number) => string | JSX.Element | null;
 export type HexEditorBodyChildren = JSX.Element | null | (() => JSX.Element);
 
 export interface BaseHexEditorProps {
-  asciiPlaceholder?: string | JSX.Element | null,
   autoFocus?: boolean,
   children?: HexEditorBodyChildren,
   className?: string,
@@ -111,6 +110,7 @@ export interface HexEditorRowBaseProps {
 
 export interface HexEditorSectionProps extends HexEditorRowBaseProps {
   dataOffsets: number[],
+  isColumnLabel?: boolean,
 };
 
 export type HexEditorSectionRenderer = (props: HexEditorSectionProps) => any;
@@ -135,6 +135,11 @@ export interface HexEditorValueProps {
   onClick?: (e: React.MouseEvent) => void,
   rowIndex?: number,
   value?: number | null,
+}
+
+export interface HexEditorContextValueProps extends HexEditorValueProps {
+  children?: (props: HexEditorValueProps) => any,
+  useNybbleValue?: boolean,
 }
 
 export interface HexEditorHandle {

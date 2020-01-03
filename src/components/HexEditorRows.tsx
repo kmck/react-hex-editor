@@ -13,14 +13,15 @@ import {
 
 import { HexEditorBodyChildren, HexEditorSectionRenderer } from '../types';
 
-import HexEditorRow from './HexEditorRow';
+import HexEditorContextRow from './HexEditorContextRow';
 import HexEditorRowLabel from './HexEditorRowLabel';
 import HexEditorRowBytes from './HexEditorRowBytes';
-// import HexEditorRowAscii from './HexEditorRowAscii';
+import HexEditorRowAscii from './HexEditorRowAscii';
 
-export interface HexEditorRowsProps {
+export interface HexEditorRowsProps<K extends string = string> {
   children?: HexEditorBodyChildren,
   className?: string,
+  columns: number,
   height: number,
   onItemsRendered: (props: ListOnItemsRenderedProps) => any,
   onScroll?: (props: ListOnScrollProps) => any,
@@ -28,6 +29,8 @@ export interface HexEditorRowsProps {
   rowCount: number,
   rowHeight: number,
   rows: number,
+  sectionRenderers?: { [key in K]: HexEditorSectionRenderer },
+  sections?: K[],
   showColumnLabels?: boolean,
   showRowLabels?: boolean,
   style?: React.CSSProperties,
@@ -37,6 +40,7 @@ export interface HexEditorRowsProps {
 const HexEditorRows: React.RefForwardingComponent<List, HexEditorRowsProps> = ({
   children: bodyChildren,
   className = undefined,
+  columns,
   height,
   onItemsRendered,
   onScroll,
@@ -44,49 +48,73 @@ const HexEditorRows: React.RefForwardingComponent<List, HexEditorRowsProps> = ({
   rowCount,
   rowHeight,
   rows,
+  sectionRenderers: customSectionRenderers,
+  sections: customSections = ['ascii'],
   showColumnLabels = true,
   showRowLabels = true,
   style,
   width,
 }, ref: React.Ref<List>) => {
+  // This gets passed to `rowRenderer()` as `data`
   const itemData = useMemo(() => ({
-    foo: 'bar'
-  }), []);
+    columns,
+    rows,
+  }), [columns, rows]);
 
+  // Generate main sections of each row
   const {
     rowSectionRenderers,
     rowSections,
   } = useMemo(() => {
-    const sections = ['label', 'bytes'];
-    // const sections = ['label', 'bytes', 'ascii'];
-    const sectionRenderers = {
-      // ascii: HexEditorRowLabel,
-      byte: HexEditorRowBytes,
+    const sectionRenderers: { [key: string]: HexEditorSectionRenderer } = {
+      ascii: HexEditorRowAscii,
+      bytes: HexEditorRowBytes,
       label: HexEditorRowLabel,
+      ...customSectionRenderers,
     };
+
+    const sections: string[] = ['bytes', ...customSections];
+
+    if (showRowLabels) {
+      sections.unshift('label');
+    }
+
     return {
       rowSectionRenderers: sectionRenderers,
       rowSections: sections,
     };
-  }, [showRowLabels]);
+  }, [showRowLabels, customSectionRenderers, customSections]);
 
-  const rowRenderer = useCallback(({ data, index, style }: ListChildComponentProps) => {
+  interface HexEditorRowsChildComponentProps extends ListChildComponentProps {
+    data: typeof itemData
+  }
+
+  // Render a single row, honoring the column label row offset if in use
+  const rowRenderer = useCallback(({ data: rowItemData, index, style }: HexEditorRowsChildComponentProps) => {
     const rowIndex = showColumnLabels ? index - 1 : index;
+    const offset = rowIndex < 0 ? -1 : rowIndex * rowItemData.columns;
     return (
-      <HexEditorRow
+      <HexEditorContextRow
+        {...rowItemData}
+        offset={offset}
         rowIndex={rowIndex}
         rowSectionRenderers={rowSectionRenderers}
         rowSections={rowSections}
-        style={style}
+        style={{
+          ...style,
+          display: 'flex',
+        }}
       />
     );
   }, [rowSectionRenderers, showColumnLabels]);
 
+  // Render the HexEditor body, excluing the fixed row as necessary
   const bodyRowRenderer = useMemo(() => (showColumnLabels
     ? (props: ListChildComponentProps) => (props.index ? rowRenderer(props) : null)
     : rowRenderer
   ), [showColumnLabels]);
 
+  // Render the list of HexEditorRow components as well as the fixed row, if needed
   const innerElementType = useMemo(() => {
     const stickyStyle: React.CSSProperties = { position: 'sticky', top: 0, left: 0 };
     return forwardRef(({

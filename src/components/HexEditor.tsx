@@ -9,7 +9,6 @@ import React, {
   useReducer,
   useRef,
 } from 'react';
-import joinClassNames from 'classnames';
 import {
   Align,
   ListOnItemsRenderedProps,
@@ -61,7 +60,9 @@ import CLASS_NAMES from '../constants/classNames';
 import INLINE_STYLES, { INPUT_STYLE } from '../constants/inlineStyles';
 
 import HexEditorContext, { HexEditorContextInterface } from '../contexts/HexEditorContext';
+
 import HexEditorRows from './HexEditorRows';
+import DebugContext from './DebugContext';
 
 interface HexEditorState {
   cursorOffset: number,
@@ -101,7 +102,6 @@ const reducer = (
 ) => ({ ...prevState, ...mergeState });
 
 const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> = ({
-  asciiPlaceholder = <>&nbsp;</>,
   autoFocus = false,
   children,
   className,
@@ -110,7 +110,6 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   data = [],
   formatValue = byteToAscii,
   height,
-  highlightColumn = false,
   inlineStyles = INLINE_STYLES,
   inputStyle = INPUT_STYLE,
   nonce,
@@ -145,11 +144,6 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     visibleStartIndex: 0,
     visibleStopIndex: 0,
   });
-
-  const columnData = useMemo(
-    () => new Array(columns).fill(0).map((_v, i) => i),
-    [columns],
-  );
 
   const listRef = useRef<List>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -667,12 +661,14 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     }
   }, [onItemsRendered]);
 
+  // Handle autofocus
   useLayoutEffect(() => {
     if (autoFocus) {
       focus();
     }
   }, [autoFocus, focus]);
 
+  // Keep the cursor in view
   useLayoutEffect(() => {
     if (listRef.current) {
       const {
@@ -693,15 +689,17 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     [data.length, columns],
   );
 
+  ///
   const formatOffset = useMemo(() => {
     const padToLength = 2 * Math.ceil(formatHex(Math.max(0, data.length - 1)).length / 2);
     return (offset: number) => formatHex(offset, padToLength);
   }, [data.length]);
 
-  const { formatHeaderOffset, formatHeaderValue } = useMemo(() => ({
-    formatHeaderOffset: () => formatOffset(0).replace(/./g, '\u00A0'),
-    formatHeaderValue: () => '\u00A0',
-  }), [formatOffset]);
+  ///
+  // const { formatHeaderOffset, formatHeaderValue } = useMemo(() => ({
+  //   formatHeaderOffset: () => formatOffset(0).replace(/./g, '\u00A0'),
+  //   formatHeaderValue: () => '\u00A0',
+  // }), [formatOffset]);
 
   const {
     cursorColumn,
@@ -729,34 +727,35 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     state.selectionDirection,
   ]);
 
+  ///
   const editorStyle = useMemo(() => (
     style && inlineStyles.editor
       ? { ...inlineStyles.editor, ...style }
       : (style || inlineStyles.editor || undefined)
   ), [style, inlineStyles.editor]);
 
+  ///
   const headerStyle: React.CSSProperties = useMemo(() => ({
     ...inlineStyles.header,
     height: rowHeight,
     width,
   }), [inlineStyles.header, rowHeight, width]);
 
+  ///
   const bodyStyle: React.CSSProperties = useMemo(() => ({
     ...inlineStyles.body,
     overflowY: 'scroll',
   }), [inlineStyles.body]);
 
   const hexEditorContext: HexEditorContextInterface = useMemo(() => ({
-    asciiPlaceholder,
     classNames,
     columns,
-    cursorColumn: highlightColumn ? cursorColumn : undefined,
+    cursorColumn: cursorColumn,
     cursorOffset: state.cursorOffset,
     cursorRow,
     data,
     formatOffset,
     formatValue,
-    isEditing: !!state.nybbleOffset,
     nonce,
     nybbleHigh: state.nybbleHigh,
     rows,
@@ -771,7 +770,6 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     showRowLabels,
     styles: inlineStyles,
   }), [
-    asciiPlaceholder,
     classNames,
     columns,
     cursorColumn,
@@ -779,7 +777,6 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
     data,
     formatOffset,
     formatValue,
-    highlightColumn,
     inlineStyles,
     nonce,
     rows,
@@ -800,15 +797,19 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
   return (
     <HexEditorContext.Provider value={hexEditorContext}>
       <div
-        className={joinClassNames(
-          className,
-          {
-            [classNames.editAscii || '']: state.editMode === EDIT_MODE_ASCII,
-            [classNames.editHex || '']: state.editMode === EDIT_MODE_HEX,
-            [classNames.notFocused || '']: !state.isFocused && state.selectionAnchor == null,
-          },
-        )}
-        style={editorStyle}
+        className={className}
+        // className={joinClassNames(
+        //   className,
+        //   {
+        //     [classNames.editAscii || '']: state.editMode === EDIT_MODE_ASCII,
+        //     [classNames.editHex || '']: state.editMode === EDIT_MODE_HEX,
+        //     [classNames.notFocused || '']: !state.isFocused && state.selectionAnchor == null,
+        //   },
+        // )}
+        // style={editorStyle} ///
+        style={{
+          fontFamily: 'monospace',
+        }}
       >
         <input
           onBlur={handleBlur}
@@ -821,6 +822,7 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
           type="text"
         />
         <HexEditorRows
+          columns={columns}
           className={classNames.body}
           height={height}
           onItemsRendered={handleItemsRendered}
@@ -830,12 +832,13 @@ const HexEditor: React.RefForwardingComponent<HexEditorHandle, HexEditorProps> =
           rowHeight={rowHeight}
           rows={rows}
           showColumnLabels={showColumnLabels}
-          style={bodyStyle}
+          // style={bodyStyle} ///
           width={width}
         >
           {children}
         </HexEditorRows>
       </div>
+      <DebugContext />
     </HexEditorContext.Provider>
   );
 };

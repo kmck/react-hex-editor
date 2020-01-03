@@ -342,6 +342,13 @@ Sets a value in the Hex Editor.
 - Text/byte search
 - Demo page
 
+## DEV NOTES
+
+* State and callbacks are maintained at the root `HexEditor` component
+* `<input>` mediates keyboard and paste events
+* `HexEditorRows` wraps `List` component from `react-window` to handle virtualization
+* Each `HexEditorRow` can be configured with any number of sections
+
 
 ## Contributing
 

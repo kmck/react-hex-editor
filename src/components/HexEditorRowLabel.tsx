@@ -14,11 +14,20 @@ function arePropsEquivalent(prevProps: HexEditorRowLabelProps, nextProps: HexEdi
 }
 
 const HexEditorRowLabel = ({
-  formatOffset,
+  data = [],
+  // formatOffset,
   offset,
-}: HexEditorRowLabelProps) => (
-  <div>{formatOffset && offset != null ? formatOffset(offset) : offset}</div>
-);
+}: HexEditorRowLabelProps) => {
+  const maxOffsetLength = 2 * Math.ceil(data.length.toString(16).length / 2);
+  const formatOffset = (offset?: number) => (
+    offset == null || offset < 0
+      ? ''.padStart(maxOffsetLength, '\u00A0')
+      : offset.toString(16).padStart(maxOffsetLength, '0'
+  ));
+  return (
+    <div>{formatOffset && offset != null ? formatOffset(offset) : offset}</div>
+  );
+}
 
 HexEditorRowLabel.displayName = 'HexEditorRowLabel';
 

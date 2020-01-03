@@ -98,6 +98,24 @@ export function shallowDiffersForKeys(
   return false;
 }
 
+export function dataDiffers(
+  prevData: Uint8Array | number[] | null | undefined,
+  nextData: Uint8Array | number[] | null | undefined,
+  dataOffsets: number[],
+) {
+  if (!prevData && prevData === nextData) {
+    return false;
+  }
+  if (!prevData || !nextData) {
+    return true;
+  }
+  const changedIndex = dataOffsets.findIndex(offset => prevData[offset] !== nextData[offset]);
+  if (changedIndex) {
+    console.log({ changedIndex });
+  }
+  return changedIndex >= 0;
+}
+
 export function getOffsetProperties({
   columnIndex = -1,
   cursorColumn = -1,
