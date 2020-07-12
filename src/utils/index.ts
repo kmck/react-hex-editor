@@ -12,7 +12,6 @@ export function getScrollbarSize(parentNode = document.body) {
   outer.setAttribute('data-measure-scrollbar', 'true');
   outer.style.visibility = 'hidden';
   outer.style.overflow = 'scroll';
-  outer.style.msOverflowStyle = 'scrollbar';
   parentNode.appendChild(outer);
 
   const inner = document.createElement('div');

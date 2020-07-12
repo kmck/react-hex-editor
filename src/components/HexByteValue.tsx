@@ -67,12 +67,6 @@ const HexByte = ({
   useEffect(() => {
     if (isCursor || isSelectionCursor) {
       setHighlight(true);
-      const interval = setInterval(() => {
-        setHighlight(prevHighlight => !prevHighlight);
-      }, 250);
-      return () => {
-        clearInterval(interval);
-      };
     } else {
       setHighlight(false);
     }

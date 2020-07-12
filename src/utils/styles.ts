@@ -15,6 +15,20 @@ export default css`
   color: ${hexEditorTheme('colorText')};
   background-color: ${hexEditorTheme('colorBackground')};
 
+  @keyframes highlight-animation {
+    50% {
+      background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
+      color: ${hexEditorTheme('colorTextCursorHighlight')};
+    }
+  }
+
+  @keyframes highlight-animation-unfocused {
+    50% {
+      background-color: ${hexEditorTheme('colorBackgroundInactiveCursorHighlight')};
+      color: ${hexEditorTheme('colorTextInactiveCursorHighlight')};
+    }
+  }
+
   &::selection {
     background-color: transparent;
   }
@@ -43,11 +57,12 @@ export default css`
   .hexEditorHeader,
   .hexEditorBody {
     &::-webkit-scrollbar {
-      width: auto;
+      width: ${hexEditorTheme('scrollWidth')};
       height: 0;
     }
 
     &::-webkit-scrollbar-thumb {
+      width: ${hexEditorTheme('scrollWidth')};
       background-color: ${hexEditorTheme('colorScrollbackThumb')};
 
       &:hover {
@@ -56,10 +71,12 @@ export default css`
     }
 
     &::-webkit-scrollbar-track {
+      width: ${hexEditorTheme('scrollWidth')};
       background-color: ${hexEditorTheme('colorScrollbackTrack')};
     }
 
     &::-webkit-scrollbar-button {
+      width: ${hexEditorTheme('scrollWidth')};
       background-color: ${hexEditorTheme('colorScrollbackThumb')};
       height: 0;
     }
@@ -195,8 +212,8 @@ export default css`
 
     &.cursorHigh.highlight > .nybbleHighValue,
     &.cursorLow.highlight > .nybbleLowValue {
-      background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
-      color: ${hexEditorTheme('colorTextCursorHighlight')};
+      animation: highlight-animation ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
+      -webkit-animation: highlight-animation ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection > .nybbleHighValue,
@@ -222,8 +239,8 @@ export default css`
 
     &.cursorHigh.highlight > .nybbleHighValue,
     &.cursorLow.highlight > .nybbleLowValue {
-      background-color: ${hexEditorTheme('colorBackgroundInactiveCursorHighlight')};
-      color: ${hexEditorTheme('colorTextInactiveCursorHighlight')};
+      animation: highlight-animation-unfocused ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
+      -webkit-animation: highlight-animation-unfocused ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection > .nybbleHighValue,
@@ -246,8 +263,8 @@ export default css`
     }
 
     &.cursor.highlight {
-      background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
-      color: ${hexEditorTheme('colorTextCursorHighlight')};
+      animation: highlight-animation ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
+      -webkit-animation: highlight-animation ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection {
@@ -269,8 +286,8 @@ export default css`
     }
 
     &.cursor.highlight {
-      background-color: ${hexEditorTheme('colorBackgroundInactiveCursorHighlight')};
-      color: ${hexEditorTheme('colorTextInactiveCursorHighlight')};
+      animation: highlight-animation-unfocused ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
+      -webkit-animation: highlight-animation-unfocused ${hexEditorTheme('highlightBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection {
