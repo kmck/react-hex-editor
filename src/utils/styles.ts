@@ -15,10 +15,24 @@ export default css`
   color: ${hexEditorTheme('colorText')};
   background-color: ${hexEditorTheme('colorBackground')};
 
+  @-webkit-keyframes highlight-animation {
+    50% {
+      background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
+      color: ${hexEditorTheme('colorTextCursorHighlight')};
+    }
+  }
+
   @keyframes highlight-animation {
     50% {
       background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
       color: ${hexEditorTheme('colorTextCursorHighlight')};
+    }
+  }
+
+  @-webkit-keyframes highlight-animation-unfocused {
+    50% {
+      background-color: ${hexEditorTheme('colorBackgroundInactiveCursorHighlight')};
+      color: ${hexEditorTheme('colorTextInactiveCursorHighlight')};
     }
   }
 
