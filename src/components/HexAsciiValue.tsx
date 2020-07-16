@@ -102,12 +102,12 @@ const HexByteAscii = ({
         className,
         {
           [classNames.cursor || '']: isCursor,
+          [classNames.highlight || '']: isCursor || isSelectionCursor,
           [classNames.invalid || '']: value == null,
           [classNames.selection || '']: isSelected,
           [classNames.selectionCursor || '']: isSelectionCursor,
           [classNames.selectionEnd || '']: isSelectionEnd,
           [classNames.selectionStart || '']: isSelectionStart,
-          [classNames.highlight || '']: isCursor || isSelectionCursor
         },
       )}
       data-offset={offset}

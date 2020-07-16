@@ -106,13 +106,13 @@ const HexByte = ({
           [classNames.cursorHigh || '']: isCursor && !isEditing,
           [classNames.cursorLow || '']: isCursor && isEditing,
           [classNames.even || '']: columnIndex != null && columnIndex % 2 === 0,
+          [classNames.highlight || '']: isCursor || isSelectionCursor,
           [classNames.invalid || '']: value == null,
           [classNames.odd || '']: columnIndex != null && columnIndex % 2 === 1,
           [classNames.selection || '']: isSelected,
           [classNames.selectionCursor || '']: isSelectionCursor,
           [classNames.selectionEnd || '']: isSelectionEnd,
           [classNames.selectionStart || '']: isSelectionStart,
-          [classNames.highlight || '']: isCursor || isSelectionCursor
         },
       )}
       data-offset={offset}
