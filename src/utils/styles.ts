@@ -15,24 +15,10 @@ export default css`
   color: ${hexEditorTheme('colorText')};
   background-color: ${hexEditorTheme('colorBackground')};
 
-  @-webkit-keyframes highlight-animation {
-    50% {
-      background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
-      color: ${hexEditorTheme('colorTextCursorHighlight')};
-    }
-  }
-
   @keyframes highlight-animation {
     50% {
       background-color: ${hexEditorTheme('colorBackgroundCursorHighlight')};
       color: ${hexEditorTheme('colorTextCursorHighlight')};
-    }
-  }
-
-  @-webkit-keyframes highlight-animation-unfocused {
-    50% {
-      background-color: ${hexEditorTheme('colorBackgroundInactiveCursorHighlight')};
-      color: ${hexEditorTheme('colorTextInactiveCursorHighlight')};
     }
   }
 
@@ -227,7 +213,6 @@ export default css`
     &.cursorHigh.highlight > .nybbleHighValue,
     &.cursorLow.highlight > .nybbleLowValue {
       animation: highlight-animation ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
-      -webkit-animation: highlight-animation ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection > .nybbleHighValue,
@@ -254,7 +239,6 @@ export default css`
     &.cursorHigh.highlight > .nybbleHighValue,
     &.cursorLow.highlight > .nybbleLowValue {
       animation: highlight-animation-unfocused ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
-      -webkit-animation: highlight-animation-unfocused ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection > .nybbleHighValue,
@@ -278,7 +262,6 @@ export default css`
 
     &.cursor.highlight {
       animation: highlight-animation ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
-      -webkit-animation: highlight-animation ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection {
@@ -301,7 +284,6 @@ export default css`
 
     &.cursor.highlight {
       animation: highlight-animation-unfocused ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
-      -webkit-animation: highlight-animation-unfocused ${hexEditorTheme('cursorBlinkSpeed')} step-start 0s infinite;
     }
 
     &.selection {
