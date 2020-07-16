@@ -4,6 +4,8 @@ export type HexEditorTheme = {
   asciiPaddingX: string | number,
   bytePaddingX: string | number,
   rowPaddingY: string | number,
+  scrollWidth: string | number,
+  cursorBlinkSpeed: string,
   colorBackground: Color,
   colorBackgroundColumnEven: Color,
   colorBackgroundColumnOdd: Color,
@@ -92,7 +94,9 @@ const hexEditorTheme: HexEditorTheme = {
   fontFamily: 'monospace',
   fontSize: '16px',
   gutterWidth: '0.5em',
+  cursorBlinkSpeed: '0.5s',
   labelPaddingX: '0.5em',
+  scrollWidth: 'auto',
   textTransform: 'uppercase',
 };
 

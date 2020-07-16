@@ -62,22 +62,6 @@ const HexByte = ({
   style,
   value = 0x00,
 }: Props, ref: React.Ref<HTMLDivElement>) => {
-  const [highlight, setHighlight] = useState(false);
-
-  useEffect(() => {
-    if (isCursor || isSelectionCursor) {
-      setHighlight(true);
-      const interval = setInterval(() => {
-        setHighlight(prevHighlight => !prevHighlight);
-      }, 250);
-      return () => {
-        clearInterval(interval);
-      };
-    } else {
-      setHighlight(false);
-    }
-  }, [isCursor, isSelectionCursor]);
-
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (setSelectionStart && e.button === 0 && !e.ctrlKey) {
       if (e.shiftKey) {
@@ -122,13 +106,13 @@ const HexByte = ({
           [classNames.cursorHigh || '']: isCursor && !isEditing,
           [classNames.cursorLow || '']: isCursor && isEditing,
           [classNames.even || '']: columnIndex != null && columnIndex % 2 === 0,
-          [classNames.highlight || '']: highlight,
           [classNames.invalid || '']: value == null,
           [classNames.odd || '']: columnIndex != null && columnIndex % 2 === 1,
           [classNames.selection || '']: isSelected,
           [classNames.selectionCursor || '']: isSelectionCursor,
           [classNames.selectionEnd || '']: isSelectionEnd,
           [classNames.selectionStart || '']: isSelectionStart,
+          [classNames.highlight || '']: isCursor || isSelectionCursor
         },
       )}
       data-offset={offset}

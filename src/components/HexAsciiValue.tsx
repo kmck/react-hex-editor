@@ -58,26 +58,10 @@ const HexByteAscii = ({
   style,
   value = 0x00,
 }: Props, ref: React.Ref<HTMLDivElement>) => {
-  const [highlight, setHighlight] = useState(false);
-
   const formattedValue = useMemo(
     () => (formatValue && value != null ? formatValue(value) : value),
     [value, formatValue],
   );
-
-  useEffect(() => {
-    if (isCursor || isSelectionCursor) {
-      setHighlight(true);
-      const interval = setInterval(() => {
-        setHighlight(prevHighlight => !prevHighlight);
-      }, 250);
-      return () => {
-        clearInterval(interval);
-      };
-    } else {
-      setHighlight(false);
-    }
-  }, [isCursor, isSelectionCursor]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (setSelectionStart && e.button === 0 && !e.ctrlKey) {
@@ -118,12 +102,12 @@ const HexByteAscii = ({
         className,
         {
           [classNames.cursor || '']: isCursor,
-          [classNames.highlight || '']: highlight,
           [classNames.invalid || '']: value == null,
           [classNames.selection || '']: isSelected,
           [classNames.selectionCursor || '']: isSelectionCursor,
           [classNames.selectionEnd || '']: isSelectionEnd,
           [classNames.selectionStart || '']: isSelectionStart,
+          [classNames.highlight || '']: isCursor || isSelectionCursor
         },
       )}
       data-offset={offset}

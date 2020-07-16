@@ -44,7 +44,9 @@ const hexEditorTheme: HexEditorTheme = {
   fontFamily: 'monospace',
   fontSize: '16px',
   gutterWidth: '0.5em',
+  cursorBlinkSpeed: '0.5s',
   labelPaddingX: '0.5em',
+  scrollWidth: 'auto',
   textTransform: 'uppercase',
 };
 
