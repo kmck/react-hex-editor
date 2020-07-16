@@ -2,9 +2,7 @@ import React, {
   forwardRef,
   memo,
   useCallback,
-  useEffect,
   useMemo,
-  useState,
 } from 'react';
 import joinClassNames from 'classnames';
 

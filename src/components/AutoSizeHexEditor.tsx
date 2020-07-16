@@ -43,7 +43,7 @@ interface AutoSizeHexEditorAction {
 
 const reducer = (
   prevState: AutoSizeHexEditorState,
-  mergeState: AutoSizeHexEditorAction
+  mergeState: AutoSizeHexEditorAction,
 ) => ({ ...prevState, ...mergeState });
 
 const AutoSizeHexEditor: React.RefForwardingComponent<HexEditorHandle, AutoSizeHexEditorProps> = ({
